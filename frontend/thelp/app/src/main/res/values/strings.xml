@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">thelp</string>
+    <string name="thelp">THELP</string>
+    <string name="description">校园众包平台</string>
+    <string name="sign_up">注册</string>
+    <string name="sign_in">登录</string>
+    <string name="forgot_password">忘记密码?</string>
+    <string name="title">THELP</string>
+    <string name="username_hint">手机号</string>
+    <string name="password_hint">密码</string>
+</resources>
