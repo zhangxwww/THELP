@@ -13,6 +13,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.request.MySingleton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -23,8 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
-    private TextInputEditText usernameEdit;
-    private TextInputEditText passwordEdit;
+    private TextInputLayout usernameEdit;
+    private TextInputLayout passwordEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +53,20 @@ public class LoginActivity extends AppCompatActivity {
         // Sending http request and wait for response
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/signup";
         Map<String, String> map = new HashMap<>();
-        map.put("phone", Objects.requireNonNull(usernameEdit.getText()).toString());
-        map.put("password", Objects.requireNonNull(passwordEdit.getText()).toString());
+        map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
+        map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).getText().toString());
+
+
+        if (usernameEdit.getEditText().getText().length() != 11){
+            usernameEdit.setError(getResources().getString(R.string.helper_text));
+        }else{
+            usernameEdit.setError("");
+        }
+        if (passwordEdit.getEditText().getText().length() > 20){
+            passwordEdit.setError(getResources().getString(R.string.password_helper_text));
+        }else{
+            passwordEdit.setError("");
+        }
         String json = new Gson().toJson(map);
         JSONObject jsonObject = null;
         try {
@@ -78,15 +91,27 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
+//        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
     }
 
     private void onClickSigninButton() {
         // Sending http request and wait for response
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/login";
         Map<String, String> map = new HashMap<>();
-        map.put("phone", Objects.requireNonNull(usernameEdit.getText()).toString());
-        map.put("password", Objects.requireNonNull(passwordEdit.getText()).toString());
+        map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).toString());
+        map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).toString());
+        System.out.println(usernameEdit.getEditText().getText().length());
+        if (usernameEdit.getEditText().toString().length() != 11){
+            usernameEdit.setError(getResources().getString(R.string.helper_text));
+        }else{
+            usernameEdit.setError("");
+        }
+        if (passwordEdit.getEditText().getText().length() > 20){
+            passwordEdit.setError(getResources().getString(R.string.password_helper_text));
+        }else{
+            System.out.println("<=20");
+            passwordEdit.setError("");
+        }
         String json = new Gson().toJson(map);
         JSONObject jsonObject = null;
         try {
@@ -111,6 +136,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
+//        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
     }
 }
