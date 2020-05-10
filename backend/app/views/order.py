@@ -6,7 +6,7 @@ from app import db
 from app.models import User
 from app.models import Order
 
-from .utils import session_id_required
+from .utils import session_id_required, get_order, check_order_relation
 
 order = Blueprint('order', __name__)
 
@@ -90,18 +90,10 @@ def create(u=None):
 def edit(u=None):
     order_info = request.json.get('order_info', {})
     order_id = request.json.get('order_id')
-    if order_id is None:
-        return {
-            'success': False,
-            'error_msg': 'Order id required'
-        }
-    o = Order.query.filter(Order.order_id == order_id).first()
+    o, ret = get_order(order_id)
     if o is None:
-        return {
-            'success': False,
-            'error_msg': 'Order<id: {}> not exists'.format(order_id)
-        }
-    if o.customer_id != u.id:
+        return ret
+    if not check_order_relation(o, u, 'customer'):
         return {
             'success': False,
             'error_msg': 'Permission denied'
@@ -121,3 +113,127 @@ def edit(u=None):
     if 'reward' in order_info.keys():
         o.reward = order_info['reward']
     db.session.commit()
+
+
+@order.route('/cancel', methods=['POST'])
+@session_id_required
+def cancel(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if not check_order_relation(o, u, 'customer'):
+        return {
+            'success': False,
+            'error_msg': 'Permission denied'
+        }
+    o.state = 'canceled'
+    db.session.commit()
+    return {
+        'success': True,
+        'error_msg': ''
+    }
+
+
+@order.route('/accept', methods=['POST'])
+@session_id_required
+def accept(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if o.state != 'active':
+        return {
+            'success': False,
+            'error_msg': 'Order<id: {}> is not active'.format(order_id)
+        }
+    o.state = 'accepted'
+    o.handler = u.id
+    db.session.commit()
+    return {
+        'success': True,
+        'error_msg': ''
+    }
+
+
+@order.route('/finish', methods=['POST'])
+@session_id_required
+def finish(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if not check_order_relation(o, u, 'handler'):
+        return {
+            'success': False,
+            'error_msg': 'Permission denied'
+        }
+    if o.state != 'accepted':
+        return {
+            'success': False,
+            'error_msg': 'Order<id: {}> is not accepted'.format(order_id)
+        }
+    o.state = 'finished'
+    db.session.commit()
+    return {
+        'success': True,
+        'error_msg': ''
+    }
+
+
+@order.route('/abort', methods=['POST'])
+@session_id_required
+def abort(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if not check_order_relation(o, u, 'customer'):
+        return {
+            'success': False,
+            'error_msg': 'Permission denied'
+        }
+    if o.state != 'accepted':
+        return {
+            'success': False,
+            'error_msg': 'Order<id: {}> is not accepted'.format(order_id)
+        }
+    o.state = 'active'
+    db.session.commit()
+    db.session.commit()
+    return {
+        'success': True,
+        'error_msg': ''
+    }
+
+
+@order.route('/access', methods=['POST'])
+@session_id_required
+def access(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if not check_order_relation(o, u, 'customer'):
+        return {
+            'success': False,
+            'error_msg': 'Permission denied'
+        }
+    if o.state != 'finished':
+        return {
+            'success': False,
+            'error_msg': 'Order<id: {}> is not finished'.format(order_id)
+        }
+    assess = request.json.get('assess')
+    if assess is None:
+        return {
+            'success': False,
+            'error_msg': 'Assess required'
+        }
+    o.assessment = float(assess)
+    db.session.commit()
+    return {
+        'success': True,
+        'error_msg': ''
+    }
+

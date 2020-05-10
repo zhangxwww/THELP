@@ -1,6 +1,7 @@
 from flask import session
 
 from app.models import User
+from app.models import Order
 
 import os
 import time
@@ -15,6 +16,29 @@ def get_user_by_session_id():
     return u
 
 
+def get_order(order_id):
+    if order_id is None:
+        return None, {
+            'success': False,
+            'error_msg': 'Order id required'
+        }
+    o = Order.query.filter(Order.order_id == order_id).first()
+    if o is None:
+        return None, {
+            'success': False,
+            'error_msg': 'Order<id: {}> not exists'.format(order_id)
+        }
+
+
+def check_order_relation(o, u, relation):
+    if relation == 'customer' and o.customer_id != u.id or relation == 'handler' and o.handler_id != u.id:
+        return None, {
+            'success': False,
+            'error_msg': 'Permission denied'
+        }
+    return o, None
+
+
 def session_id_required(f):
     def g(*args, **kwargs):
         u = get_user_by_session_id()
@@ -24,6 +48,7 @@ def session_id_required(f):
                 'error_msg': 'Login please'
             }
         return f(*args, u=u, **kwargs)
+
     g.__name__ = f.__name__
     return g
 
