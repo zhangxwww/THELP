@@ -63,8 +63,9 @@ def create(u=None):
     trans_func = {
         'reward': int
     }
+    order_info = request.json.get('order_info', {})
     for k in required_fields.keys():
-        field = request.json.get(k)
+        field = order_info.get(k)
         if field is None:
             return {
                 'success': False,
@@ -82,3 +83,41 @@ def create(u=None):
         'success': True,
         'error_msg': ''
     }
+
+
+@order.route('/edit', methods=['POST'])
+@session_id_required
+def edit(u=None):
+    order_info = request.json.get('order_info', {})
+    order_id = request.json.get('order_id')
+    if order_id is None:
+        return {
+            'success': False,
+            'error_msg': 'Order id required'
+        }
+    o = Order.query.filter(Order.order_id == order_id).first()
+    if o is None:
+        return {
+            'success': False,
+            'error_msg': 'Order<id: {}> not exists'.format(order_id)
+        }
+    if o.customer_id != u.id:
+        return {
+            'success': False,
+            'error_msg': 'Permission denied'
+        }
+    if 'title' in order_info.keys():
+        o.title = order_info['title']
+    if 'description' in order_info.keys():
+        o.description = order_info['description']
+    if 'genre' in order_info.keys():
+        o.genre = order_info['genre']
+    if 'start_time' in order_info.keys():
+        o.start_time = order_info['start_time']
+    if 'end_time' in order_info.keys():
+        o.end_time = order_info['end_time']
+    if 'target_location' in order_info.keys():
+        o.target_location = order_info['target_location']
+    if 'reward' in order_info.keys():
+        o.reward = order_info['reward']
+    db.session.commit()
