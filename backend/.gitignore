@@ -9,8 +9,10 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-
+*.sqlite
 venv/
+
+app/static/
 
 *.pyc
 __pycache__/

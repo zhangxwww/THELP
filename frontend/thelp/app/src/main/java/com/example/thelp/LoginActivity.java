@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -91,17 +92,18 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-//        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
+        signupRequest.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, 1.0f));
+        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
     }
 
     private void onClickSigninButton() {
         // Sending http request and wait for response
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/login";
         Map<String, String> map = new HashMap<>();
-        map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).toString());
-        map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).toString());
+        map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
+        map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).getText().toString());
         System.out.println(usernameEdit.getEditText().getText().length());
-        if (usernameEdit.getEditText().toString().length() != 11){
+        if (usernameEdit.getEditText().getText().length() != 11){
             usernameEdit.setError(getResources().getString(R.string.helper_text));
         }else{
             usernameEdit.setError("");
@@ -136,6 +138,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-//        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
+        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
     }
 }

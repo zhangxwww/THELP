@@ -10,5 +10,5 @@
     <string name="password_hint">密码</string>
     <string name="helper_text">手机号应为11位</string>
     <string name="password_helper_text">密码不超过20位</string>
-    <string name="url">127.0.0.1</string>
+    <string name="url">http://10.0.2.2:5000</string>
 </resources>

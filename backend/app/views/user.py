@@ -6,18 +6,22 @@ from sqlalchemy import and_
 from app import db
 from app.models import User
 
+from .utils import get_user_by_session_id, generate_static_filename
+
 user = Blueprint('user', __name__)
 
 
 @user.route('/hello')
 def hello():
+    import os
+    print(os.path.dirname(__file__))
     return 'Hello world'
 
 
 @user.route('/signup', methods=['POST'])
 def signup():
-    phone = request.form.get('phone')
-    password = request.form.get('password')
+    phone = request.json.get('phone')
+    password = request.json.get('password')
     if phone is None:
         return {
             'success': False,
@@ -35,7 +39,7 @@ def signup():
             'success': False,
             'error_msg': 'Password is required'
         }
-    u = User.query.filter(User.phone == phone).first()
+    u = User.query.filter(User.phone == phone).with_for_update().first()
     if u:
         return {
             'success': False,
@@ -52,8 +56,8 @@ def signup():
 
 @user.route('/login', methods=['POST'])
 def login():
-    phone = request.form.get('phone')
-    password = request.form.get('password')
+    phone = request.json.get('phone')
+    password = request.json.get('password')
     if phone is None:
         return {
             'success': False,
@@ -85,22 +89,20 @@ def login():
 
 @user.route('/edit', methods=['POST'])
 def edit():
-    phone = session.get('phone')
-    if phone is None:
+    u = get_user_by_session_id()
+    if u is None:
         return {
             'success': False,
             'error_msg': 'Login please'
         }
-    phone = int(phone)
-    u = User.query.filter(User.phone == phone).first()
-    password_old = request.form.get('password_old')
-    password_new = request.form.get('password_new')
+    password_old = request.json.get('password_old')
+    password_new = request.json.get('password_new')
     if password_new is not None:
         if password_old is None:
             return {
                 'success': False,
                 'error_msg': 'Old password is required'
-        }
+            }
         if password_old != u.password:
             return {
                 'success': False,
@@ -108,11 +110,11 @@ def edit():
             }
         u.password = password_new
 
-    nickname = request.form.get('nickname')
+    nickname = request.json.get('nickname')
     if nickname is not None:
         u.nickname = nickname
 
-    signature = request.form.get('signature')
+    signature = request.json.get('signature')
     if signature is not None:
         u.signature = signature
 
@@ -122,3 +124,26 @@ def edit():
         'error_msg': ''
     }
 
+
+@user.route('/upload_avatar', methods=['POST'])
+def upload():
+    u = get_user_by_session_id()
+    if u is None:
+        return {
+            'success': False,
+            'error_msg': 'Login please'
+        }
+    f = request.files.get('file')
+    if f is None:
+        return {
+            'success': False,
+            'error_msg': 'No file received'
+        }
+    filename = generate_static_filename(f.filename, 'avatar')
+    f.save(filename)
+    u.avatar = filename
+    db.session.commit()
+    return {
+        'success': True,
+        'error_msg': ''
+    }
