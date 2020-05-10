@@ -147,3 +147,27 @@ def upload():
         'success': True,
         'error_msg': ''
     }
+
+
+@user.route('/info', methods=['GET'])
+def info():
+    user_id = request.json.get('user_id')
+    if user_id is None:
+        return {
+            'success': False,
+            'error_msg': 'user_id required'
+        }
+    u = User.query.filter(User.id == user_id).first()
+    if u is None:
+        return {
+            'success': False,
+            'error_msg': 'User<id: {}> not exists'.format(user_id)
+        }
+    return {
+        'success': True,
+        'error_msg': '',
+        'nickname': u.nickname,
+        'avatar': u.avatar,
+        'signature': u.signature,
+        'score': u.score
+    }
