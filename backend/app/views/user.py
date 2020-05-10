@@ -6,16 +6,16 @@ from sqlalchemy import and_
 from app import db
 from app.models import User
 
-from .utils import get_user_by_session_id, generate_static_filename
+from .utils import session_id_required, get_user_by_session_id, generate_static_filename
 
 user = Blueprint('user', __name__)
 
 
 @user.route('/hello')
-def hello():
+def hello(s='hello world'):
     import os
     print(os.path.dirname(__file__))
-    return 'Hello world'
+    return s
 
 
 @user.route('/signup', methods=['POST'])
@@ -88,13 +88,8 @@ def login():
 
 
 @user.route('/edit', methods=['POST'])
-def edit():
-    u = get_user_by_session_id()
-    if u is None:
-        return {
-            'success': False,
-            'error_msg': 'Login please'
-        }
+@session_id_required
+def edit(u=None):
     password_old = request.json.get('password_old')
     password_new = request.json.get('password_new')
     if password_new is not None:
@@ -126,13 +121,8 @@ def edit():
 
 
 @user.route('/upload_avatar', methods=['POST'])
-def upload():
-    u = get_user_by_session_id()
-    if u is None:
-        return {
-            'success': False,
-            'error_msg': 'Login please'
-        }
+@session_id_required
+def upload(u=None):
     f = request.files.get('file')
     if f is None:
         return {

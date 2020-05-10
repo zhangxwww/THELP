@@ -15,6 +15,19 @@ def get_user_by_session_id():
     return u
 
 
+def session_id_required(f):
+    def g(*args, **kwargs):
+        u = get_user_by_session_id()
+        if u is None:
+            return {
+                'success': False,
+                'error_msg': 'Login please'
+            }
+        return f(*args, u=u, **kwargs)
+    g.__name__ = f.__name__
+    return g
+
+
 def get_static_path(type_):
     basepath = os.path.dirname(__file__)
     path = os.path.join('..', basepath, type_)

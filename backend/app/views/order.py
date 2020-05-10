@@ -1,8 +1,12 @@
 from flask import Blueprint
 from flask import request
 
+from app import db
+
 from app.models import User
 from app.models import Order
+
+from .utils import session_id_required
 
 order = Blueprint('order', __name__)
 
@@ -38,6 +42,43 @@ def homepage():
     } for o in orders]
     return {
         'order_list': order_list,
+        'success': True,
+        'error_msg': ''
+    }
+
+
+@order.route('/create', methods=['POST'])
+@session_id_required
+def create(u=None):
+    required_fields = {
+        'title': '',
+        'description': '',
+        'genre': '',
+        'state': '',
+        'start_time': '',
+        'end_time': '',
+        'target_location': '',
+        'reward': ''
+    }
+    trans_func = {
+        'reward': int
+    }
+    for k in required_fields.keys():
+        field = request.json.get(k)
+        if field is None:
+            return {
+                'success': False,
+                'error_msg': '{} required'.format(k)
+            }
+        if k in trans_func.keys():
+            field = trans_func[k](field)
+        required_fields[k] = field
+    required_fields['customer_id'] = u.id
+    o = Order(**required_fields)
+    db.session.add(o)
+    db.session.commit()
+    return {
+        'order_id': o.order_id,
         'success': True,
         'error_msg': ''
     }
