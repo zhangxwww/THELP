@@ -20,6 +20,9 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -58,14 +61,14 @@ public class LoginActivity extends AppCompatActivity {
         map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).getText().toString());
 
 
-        if (usernameEdit.getEditText().getText().length() != 11){
+        if (usernameEdit.getEditText().getText().length() != 11) {
             usernameEdit.setError(getResources().getString(R.string.helper_text));
-        }else{
+        } else {
             usernameEdit.setError("");
         }
-        if (passwordEdit.getEditText().getText().length() > 20){
+        if (passwordEdit.getEditText().getText().length() > 20) {
             passwordEdit.setError(getResources().getString(R.string.password_helper_text));
-        }else{
+        } else {
             passwordEdit.setError("");
         }
         String json = new Gson().toJson(map);
@@ -101,16 +104,18 @@ public class LoginActivity extends AppCompatActivity {
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/login";
         Map<String, String> map = new HashMap<>();
         map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
-        map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).getText().toString());
+        map.put("password", sha(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
         System.out.println(usernameEdit.getEditText().getText().length());
-        if (usernameEdit.getEditText().getText().length() != 11){
+        if (usernameEdit.getEditText().getText().length() != 11) {
             usernameEdit.setError(getResources().getString(R.string.helper_text));
-        }else{
+            return;
+        } else {
             usernameEdit.setError("");
         }
-        if (passwordEdit.getEditText().getText().length() > 20){
+        if (passwordEdit.getEditText().getText().length() > 20) {
             passwordEdit.setError(getResources().getString(R.string.password_helper_text));
-        }else{
+            return;
+        } else {
             System.out.println("<=20");
             passwordEdit.setError("");
         }
@@ -139,5 +144,15 @@ public class LoginActivity extends AppCompatActivity {
                 }
         );
         MySingleton.getInstance(this).addToRequestQueue(signupRequest);
+    }
+
+    private String sha(String s) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            md.update(s.getBytes());
+            return new BigInteger(md.digest()).toString(32);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 }
