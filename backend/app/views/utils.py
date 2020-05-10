@@ -6,6 +6,8 @@ from app.models import Order
 import os
 import time
 
+from .return_value import field_required, permission_denied
+
 
 def get_user_by_session_id():
     phone = session.get('phone')
@@ -18,10 +20,7 @@ def get_user_by_session_id():
 
 def get_order(order_id):
     if order_id is None:
-        return None, {
-            'success': False,
-            'error_msg': 'Order id required'
-        }
+        return None, field_required('order_id')
     o = Order.query.filter(Order.order_id == order_id).first()
     if o is None:
         return None, {
@@ -32,10 +31,7 @@ def get_order(order_id):
 
 def check_order_relation(o, u, relation):
     if relation == 'customer' and o.customer_id != u.id or relation == 'handler' and o.handler_id != u.id:
-        return None, {
-            'success': False,
-            'error_msg': 'Permission denied'
-        }
+        return None, permission_denied()
     return o, None
 
 

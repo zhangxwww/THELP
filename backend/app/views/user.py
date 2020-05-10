@@ -6,7 +6,8 @@ from sqlalchemy import and_
 from app import db
 from app.models import User
 
-from .utils import session_id_required, get_user_by_session_id, generate_static_filename
+from .utils import session_id_required, generate_static_filename
+from .return_value import success, field_required
 
 user = Blueprint('user', __name__)
 
@@ -23,10 +24,7 @@ def signup():
     phone = request.json.get('phone')
     password = request.json.get('password')
     if phone is None:
-        return {
-            'success': False,
-            'error_msg': 'Phone is required'
-        }
+        return field_required('Phone')
     try:
         phone = int(phone)
     except ValueError:
@@ -35,10 +33,7 @@ def signup():
             'error_msg': 'Invalid phone number'
         }
     if password is None:
-        return {
-            'success': False,
-            'error_msg': 'Password is required'
-        }
+        return field_required('Password')
     u = User.query.filter(User.phone == phone).with_for_update().first()
     if u:
         return {
@@ -48,10 +43,7 @@ def signup():
     u = User(phone=phone, password=password)
     db.session.add(u)
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @user.route('/login', methods=['POST'])
@@ -59,15 +51,9 @@ def login():
     phone = request.json.get('phone')
     password = request.json.get('password')
     if phone is None:
-        return {
-            'success': False,
-            'error_msg': 'Phone number iis required'
-        }
+        return field_required('Phone')
     if password is None:
-        return {
-            'success': False,
-            'error_msg': 'password number iis required'
-        }
+        return field_required('Password')
     try:
         phone = int(phone)
     except ValueError:
@@ -81,10 +67,7 @@ def login():
             'error_msg': 'Wrong phone number or password'
         }
     session['phone'] = str(phone)
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @user.route('/edit', methods=['POST'])
@@ -114,10 +97,7 @@ def edit(u=None):
         u.signature = signature
 
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @user.route('/upload_avatar', methods=['POST'])
@@ -125,39 +105,28 @@ def edit(u=None):
 def upload(u=None):
     f = request.files.get('file')
     if f is None:
-        return {
-            'success': False,
-            'error_msg': 'No file received'
-        }
+        return field_required('File')
     filename = generate_static_filename(f.filename, 'avatar')
     f.save(filename)
     u.avatar = filename
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @user.route('/info', methods=['GET'])
 def info():
     user_id = request.json.get('user_id')
     if user_id is None:
-        return {
-            'success': False,
-            'error_msg': 'user_id required'
-        }
+        return field_required('user_id')
     u = User.query.filter(User.id == user_id).first()
     if u is None:
         return {
             'success': False,
             'error_msg': 'User<id: {}> not exists'.format(user_id)
         }
-    return {
-        'success': True,
-        'error_msg': '',
+    return success({
         'nickname': u.nickname,
         'avatar': u.avatar,
         'signature': u.signature,
         'score': u.score
-    }
+    })

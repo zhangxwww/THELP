@@ -7,6 +7,8 @@ from app.models import User
 from app.models import Order
 
 from .utils import session_id_required, get_order, check_order_relation
+from .return_value import success, field_required, permission_denied
+
 
 order = Blueprint('order', __name__)
 
@@ -67,10 +69,7 @@ def create(u=None):
     for k in required_fields.keys():
         field = order_info.get(k)
         if field is None:
-            return {
-                'success': False,
-                'error_msg': '{} required'.format(k)
-            }
+            return field_required(field)
         if k in trans_func.keys():
             field = trans_func[k](field)
         required_fields[k] = field
@@ -78,11 +77,9 @@ def create(u=None):
     o = Order(**required_fields)
     db.session.add(o)
     db.session.commit()
-    return {
-        'order_id': o.order_id,
-        'success': True,
-        'error_msg': ''
-    }
+    return success({
+        'order_id': o.order_id
+    })
 
 
 @order.route('/edit', methods=['POST'])
@@ -94,10 +91,7 @@ def edit(u=None):
     if o is None:
         return ret
     if not check_order_relation(o, u, 'customer'):
-        return {
-            'success': False,
-            'error_msg': 'Permission denied'
-        }
+        return permission_denied()
     if 'title' in order_info.keys():
         o.title = order_info['title']
     if 'description' in order_info.keys():
@@ -113,6 +107,7 @@ def edit(u=None):
     if 'reward' in order_info.keys():
         o.reward = order_info['reward']
     db.session.commit()
+    return success()
 
 
 @order.route('/cancel', methods=['POST'])
@@ -123,16 +118,10 @@ def cancel(u=None):
     if o is None:
         return ret
     if not check_order_relation(o, u, 'customer'):
-        return {
-            'success': False,
-            'error_msg': 'Permission denied'
-        }
+        return permission_denied()
     o.state = 'canceled'
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @order.route('/accept', methods=['POST'])
@@ -150,10 +139,7 @@ def accept(u=None):
     o.state = 'accepted'
     o.handler = u.id
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @order.route('/finish', methods=['POST'])
@@ -164,10 +150,7 @@ def finish(u=None):
     if o is None:
         return ret
     if not check_order_relation(o, u, 'handler'):
-        return {
-            'success': False,
-            'error_msg': 'Permission denied'
-        }
+        return permission_denied()
     if o.state != 'accepted':
         return {
             'success': False,
@@ -175,10 +158,7 @@ def finish(u=None):
         }
     o.state = 'finished'
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @order.route('/abort', methods=['POST'])
@@ -189,10 +169,7 @@ def abort(u=None):
     if o is None:
         return ret
     if not check_order_relation(o, u, 'customer'):
-        return {
-            'success': False,
-            'error_msg': 'Permission denied'
-        }
+        return permission_denied()
     if o.state != 'accepted':
         return {
             'success': False,
@@ -201,10 +178,7 @@ def abort(u=None):
     o.state = 'active'
     db.session.commit()
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
+    return success()
 
 
 @order.route('/access', methods=['POST'])
@@ -215,10 +189,7 @@ def access(u=None):
     if o is None:
         return ret
     if not check_order_relation(o, u, 'customer'):
-        return {
-            'success': False,
-            'error_msg': 'Permission denied'
-        }
+        return permission_denied()
     if o.state != 'finished':
         return {
             'success': False,
@@ -226,14 +197,9 @@ def access(u=None):
         }
     assess = request.json.get('assess')
     if assess is None:
-        return {
-            'success': False,
-            'error_msg': 'Assess required'
-        }
+        return field_required('Assess')
     o.assessment = float(assess)
+    # TODO update handler's score
+    
     db.session.commit()
-    return {
-        'success': True,
-        'error_msg': ''
-    }
-
+    return success()
