@@ -11,4 +11,8 @@
     <string name="helper_text">手机号应为11位</string>
     <string name="password_helper_text">密码不超过20位</string>
     <string name="url">http://10.0.2.2:5000</string>
+    <string name="home">主页</string>
+    <string name="center">个人中心</string>
+    <string name="pm">私信</string>
+    <string name="order">历史订单</string>
 </resources>
