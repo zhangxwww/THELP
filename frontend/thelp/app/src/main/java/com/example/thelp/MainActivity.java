@@ -1,6 +1,7 @@
 package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -8,6 +9,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -21,16 +24,37 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 
+import cn.carbs.android.avatarimageview.library.AvatarImageView;
+
 public class MainActivity extends AppCompatActivity {
+    private String avatar;
+    private Drawer drawer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        avatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
         setupDrawer();
+        setupActionBar();
+    }
+
+    private void setupActionBar() {
+        Toolbar myToolbar = findViewById(R.id.app_bar);
+        myToolbar.setTitle("");
+        setSupportActionBar(myToolbar);
+        AvatarImageView aiv = findViewById(R.id.aiv);
+        Glide.with(this).load(avatar).placeholder(R.mipmap.ic_launcher).centerCrop().into(aiv);
+        aiv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!drawer.isDrawerOpen()) {
+                    drawer.openDrawer();
+                }
+            }
+        });
     }
 
     private void setupDrawer() {
-        String avatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
         DrawerImageLoader.init(new AbstractDrawerImageLoader() {
             @Override
             public void set(ImageView imageView, Uri uri, Drawable placeholder) {
@@ -53,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 .withOnlyMainProfileImageVisible(true)
                 .withHeaderBackground(R.color.colorBackground)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("温斯顿").withEmail("17777777777").withIcon(avatar),
+                        new ProfileDrawerItem().withName("温斯顿").withEmail("17777777777").withIcon(avatar)
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -62,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .build();
-        Drawer result = new DrawerBuilder()
+        drawer = new DrawerBuilder()
                 .withActivity(this)
                 .addDrawerItems(
                         item1,
