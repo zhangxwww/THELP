@@ -15,4 +15,12 @@
     <string name="center">个人中心</string>
     <string name="pm">私信</string>
     <string name="order">历史订单</string>
+    <string name="search_hint">输入时间、类型或关键字</string>
+    <string name="app_label">推荐搜索</string>
+    <string name="search_title">搜索</string>
+    <string name="description_placeholder">这里是背景简介</string>
+    <string name="title_placeholder">这里是订单标题</string>
+    <string name="type_placeholder">这里是订单类型</string>
+    <string name="detail_placeholder">这里是订单详情这里是订单详情</string>
+    <string name="view_button_text">查看详情</string>
 </resources>
