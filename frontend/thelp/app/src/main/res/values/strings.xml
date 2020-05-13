@@ -19,8 +19,24 @@
     <string name="app_label">推荐搜索</string>
     <string name="search_title">搜索</string>
     <string name="description_placeholder">这里是背景简介</string>
-    <string name="title_placeholder">这里是订单标题</string>
-    <string name="type_placeholder">这里是订单类型</string>
+    <string name="title_placeholder">订单标题</string>
+    <string name="type_placeholder">订单类型</string>
     <string name="detail_placeholder">这里是订单详情这里是订单详情</string>
     <string name="view_button_text">查看详情</string>
+    <string name="publish_placeholder">发布人</string>
+    <string name="time_placeholder">某年某月某日</string>
+    <string name="add_text">创建新订单</string>
+    <string name="title_hint">输入订单名称，尽量简洁易懂</string>
+    <string name="titel_label">订单标题</string>
+    <string name="title_label">订单名称</string>
+    <string name="detail_label">详细描述</string>
+    <string name="detail_hint">输入订单详情，尽量不遗漏细节</string>
+    <string name="type_label">订单类型</string>
+    <string name="type_hint">请从下拉菜单中选择一种订单类型</string>
+    <string name="reward_label">赏金</string>
+    <string name="reward_hint">0</string>
+    <string name="start_time_label">开始时间</string>
+    <string name="start_time_hint">2020.7.11 17:59</string>
+    <string name="button_revise_time_text">修改</string>
+    <string name="end_time_label">结束时间</string>
 </resources>
