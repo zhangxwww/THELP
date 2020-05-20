@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private MaterialSearchView searchView;
     private List<Order> orderList = new ArrayList<>();
 
+    private static final int ADD_ACTIVITY_REQUEST = 233;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         setupRecyclerView();
         setupAddActivityButton();
         getUserInfo();
+        updateActivityList();
     }
 
     private void initOrderList() {
@@ -197,9 +200,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, ADD_ACTIVITY_REQUEST);
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ADD_ACTIVITY_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                updateActivityList();
+            }
+        }
     }
 
     private void getUserInfo() {
@@ -232,6 +245,8 @@ public class MainActivity extends AppCompatActivity {
         );
         MySingleton.getInstance(this).addToRequestQueue(infoRequest);
     }
+
+    private void updateActivityList() {
+        Log.d("UPDATE ACTIVITY LIST", "called");
+    }
 }
-
-

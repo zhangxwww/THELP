@@ -68,4 +68,11 @@ def generate_static_filename(name, type_):
 
 def str_2_datetime(dt):
     form = '%Y.%m.%d %H:%M'
-    return datetime.strptime(dt, form)
+    try:
+        return datetime.strptime(dt, form)
+    except ValueError:
+        form = '%Y-%m-%d %H:%M:%S'
+        try:
+            return datetime.strptime(dt, form)
+        except ValueError:
+            return None

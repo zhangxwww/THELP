@@ -72,6 +72,8 @@ def create(u=None):
         if k in trans_func.keys():
             field = trans_func[k](field)
         required_fields[k] = field
+    if required_fields['start_time'] is None or required_fields['end_time'] is None:
+        return fail('Invalid time format!')
     required_fields['customer_id'] = u.id
     required_fields['state'] = 'active'
     o = Order(**required_fields)

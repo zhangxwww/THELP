@@ -137,6 +137,8 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
     }
 
     private void backToMainActivity() {
+        Intent intent = new Intent();
+        setResult(RESULT_OK, intent);
         finish();
     }
 
