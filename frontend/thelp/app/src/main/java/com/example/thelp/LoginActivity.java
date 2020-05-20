@@ -1,6 +1,7 @@
 package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,12 +10,15 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.widget.Button;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.request.MySingleton;
+import com.example.request.RequestFactory;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
@@ -32,6 +36,8 @@ import java.util.Objects;
 public class LoginActivity extends AppCompatActivity {
     private TextInputLayout usernameEdit;
     private TextInputLayout passwordEdit;
+
+    private String sessionid = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +71,13 @@ public class LoginActivity extends AppCompatActivity {
 
         if (usernameEdit.getEditText().getText().length() != 11) {
             usernameEdit.setError(getResources().getString(R.string.helper_text));
+            return;
         } else {
             usernameEdit.setError("");
         }
         if (passwordEdit.getEditText().getText().length() > 20) {
             passwordEdit.setError(getResources().getString(R.string.password_helper_text));
+            return;
         } else {
             passwordEdit.setError("");
         }
@@ -80,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        JsonObjectRequest signupRequest = new JsonObjectRequest(
+        JsonObjectRequest signupRequest = RequestFactory.getRequest(
                 Request.Method.POST,
                 postUrl,
                 jsonObject,
@@ -93,8 +101,9 @@ public class LoginActivity extends AppCompatActivity {
                             if (success) {
                                 onClickSigninButton();
                             } else {
-                                // TODO
+                                ConstraintLayout cl = findViewById(R.id.background);
                                 String error = response.getString("error_msg");
+                                Snackbar.make(cl, error, Snackbar.LENGTH_SHORT).show();
                                 Log.d("Error Msg", error);
                             }
                         } catch (JSONException e) {
@@ -109,7 +118,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-        signupRequest.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, 1.0f));
         MySingleton.getInstance(this).addToRequestQueue(signupRequest);
     }
 
@@ -119,7 +127,6 @@ public class LoginActivity extends AppCompatActivity {
         Map<String, String> map = new HashMap<>();
         map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
         map.put("password", sha(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
-        System.out.println(usernameEdit.getEditText().getText().length());
         if (usernameEdit.getEditText().getText().length() != 11) {
             usernameEdit.setError(getResources().getString(R.string.helper_text));
             return;
@@ -140,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        JsonObjectRequest signupRequest = new JsonObjectRequest(
+        JsonObjectRequest signinRequest = RequestFactory.getRequest(
                 Request.Method.POST,
                 postUrl,
                 jsonObject,
@@ -151,11 +158,13 @@ public class LoginActivity extends AppCompatActivity {
                         try {
                             boolean success = response.getBoolean("success");
                             if (success) {
+                                //sessionid = response
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                             } else {
-                                // TODO
+                                ConstraintLayout cl = findViewById(R.id.background);
                                 String error = response.getString("error_msg");
+                                Snackbar.make(cl, error, Snackbar.LENGTH_SHORT).show();
                                 Log.d("Error Msg", error);
                             }
                         } catch (JSONException e) {
@@ -170,7 +179,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-        MySingleton.getInstance(this).addToRequestQueue(signupRequest);
+        MySingleton.getInstance(this).addToRequestQueue(signinRequest);
     }
 
     private String sha(String s) {

@@ -15,6 +15,7 @@ user = Blueprint('user', __name__)
 @user.route('/hello')
 def hello(s='hello world'):
     import os
+    session['phone'] = '123'
     print(os.path.dirname(__file__))
     return s
 
@@ -52,7 +53,7 @@ def login():
         phone = int(phone)
     except ValueError:
         return fail('Invalid phone number')
-    if not User.query.filter(and_(User.phone == phone, User.password == password)):
+    if User.query.filter(and_(User.phone == phone, User.password == password)).first() is None:
         return fail('Wrong phone number or password')
     session['phone'] = str(phone)
     return success()
