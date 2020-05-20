@@ -2,6 +2,7 @@ package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -106,5 +107,9 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
                 endTimePickerDialog.show(getSupportFragmentManager(), "month_day_hour_minute");
             }
         });
+    }
+
+    private void backToMainActivity() {
+        finish();
     }
 }

@@ -94,6 +94,8 @@ public class LoginActivity extends AppCompatActivity {
                                 onClickSigninButton();
                             } else {
                                 // TODO
+                                String error = response.getString("error_msg");
+                                Log.d("Error Msg", error);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -153,6 +155,8 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(intent);
                             } else {
                                 // TODO
+                                String error = response.getString("error_msg");
+                                Log.d("Error Msg", error);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

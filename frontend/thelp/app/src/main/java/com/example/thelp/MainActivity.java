@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import com.bumptech.glide.Glide;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         setupActionBar();
         setupSearchView();
         setupRecyclerView();
+        setupAddActivityButton();
     }
 
     private void initOrderList() {
@@ -184,6 +187,17 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .withAccountHeader(headerResult)
                 .build();
+    }
+
+    private void setupAddActivityButton() {
+        FloatingActionButton fab = findViewById(R.id.floating_action_button);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AddActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
 
