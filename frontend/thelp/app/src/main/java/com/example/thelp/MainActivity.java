@@ -55,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
     private MaterialSearchView searchView;
     private List<Order> orderList = new ArrayList<>();
 
-    private int lastPage = 0;
-
     private static final int ADD_ACTIVITY_REQUEST = 233;
 
     @Override
@@ -86,10 +84,16 @@ public class MainActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         initOrderList();
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
         OrderAdapter adapter = new OrderAdapter(orderList);
         recyclerView.setAdapter(adapter);
+        recyclerView.addOnScrollListener(new EndLessOnScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int currentPage) {
+                getMoreData(currentPage);
+            }
+        });
     }
 
     private void setupSearchView() {
@@ -261,17 +265,51 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateActivityList() {
         Log.d("UPDATE ACTIVITY LIST", "called");
-        lastPage = 0;
+        // lastPage = 0;
         // TODO
         // notify
     }
 
-    private void getMoreData() {
+    private void getMoreData(int page) {
         // TODO
+        Log.d("GET MORE DATA", "" + page);
     }
 
     private List<Order> requestOrderInPage(int page) {
         // TODO send request
         return null;
+    }
+
+    private abstract class EndLessOnScrollListener extends RecyclerView.OnScrollListener {
+        private LinearLayoutManager linearLayoutManager;
+        private int currentPage = 0;
+        private int previousTotal = 0;
+        private boolean loading = true;
+
+        public EndLessOnScrollListener(LinearLayoutManager linearLayoutManager) {
+            this.linearLayoutManager = linearLayoutManager;
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            int visibleItemCount = recyclerView.getChildCount();
+            int totalItemCount = linearLayoutManager.getItemCount();
+            int firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
+            if (loading) {
+                if (totalItemCount > previousTotal) {
+                    loading = false;
+                    previousTotal = totalItemCount;
+                }
+            }
+            if (!loading && totalItemCount - visibleItemCount <= firstVisibleItem) {
+                ++currentPage;
+                onLoadMore(currentPage);
+                loading = true;
+            }
+        }
+
+        public abstract void onLoadMore(int currentPage);
     }
 }
