@@ -8,6 +8,13 @@ def success(extra=None):
     return ret
 
 
+def fail(msg):
+    return {
+        'success': False,
+        'error_msg': msg
+    }
+
+
 def field_required(field):
     return {
         'success': False,

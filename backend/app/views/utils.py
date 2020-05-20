@@ -50,8 +50,8 @@ def session_id_required(f):
 
 
 def get_static_path(type_):
-    basepath = os.path.dirname(__file__)
-    path = os.path.join('..', basepath, type_)
+    base_path = os.path.dirname(__file__)
+    path = os.path.join('..', base_path, type_)
     if not os.path.exists(path):
         os.makedirs(path)
     return path

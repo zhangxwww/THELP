@@ -2,6 +2,7 @@ from app import db
 
 from datetime import datetime
 
+
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -11,6 +12,7 @@ class User(db.Model):
     avatar = db.Column(db.String(256), nullable=True)
     signature = db.Column(db.Text, nullable=True)
     score = db.Column(db.Float, default=0.0)
+    finished_orders = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return '<User id:{} name:{}>'.format(self.id, self.nickname)
@@ -39,4 +41,3 @@ class Order(db.Model):
 
     reward = db.Column(db.String(32), nullable=True)
     assessment = db.Column(db.Float, default=5.0)
-

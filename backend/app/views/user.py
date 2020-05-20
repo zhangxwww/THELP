@@ -7,7 +7,7 @@ from app import db
 from app.models import User
 
 from .utils import session_id_required, generate_static_filename
-from .return_value import success, field_required
+from .return_value import success, field_required, fail
 
 user = Blueprint('user', __name__)
 
@@ -28,18 +28,12 @@ def signup():
     try:
         phone = int(phone)
     except ValueError:
-        return {
-            'success': False,
-            'error_msg': 'Invalid phone number'
-        }
+        return fail('Invalid phone number')
     if password is None:
         return field_required('Password')
     u = User.query.filter(User.phone == phone).with_for_update().first()
     if u:
-        return {
-            'success': False,
-            'error_msg': 'Phone number has been used'
-        }
+        return fail('Phone number has been used')
     u = User(phone=phone, password=password)
     db.session.add(u)
     db.session.commit()
@@ -57,15 +51,9 @@ def login():
     try:
         phone = int(phone)
     except ValueError:
-        return {
-            'success': False,
-            'error_msg': 'Invalid phone number'
-        }
+        return fail('Invalid phone number')
     if not User.query.filter(and_(User.phone == phone, User.password == password)):
-        return {
-            'success': False,
-            'error_msg': 'Wrong phone number or password'
-        }
+        return fail('Wrong phone number or password')
     session['phone'] = str(phone)
     return success()
 
@@ -77,15 +65,9 @@ def edit(u=None):
     password_new = request.json.get('password_new')
     if password_new is not None:
         if password_old is None:
-            return {
-                'success': False,
-                'error_msg': 'Old password is required'
-            }
+            return fail('Old password is required')
         if password_old != u.password:
-            return {
-                'success': False,
-                'error_msg': 'Wrong password'
-            }
+            return fail('Wrong password')
         u.password = password_new
 
     nickname = request.json.get('nickname')
@@ -120,10 +102,7 @@ def info():
         return field_required('user_id')
     u = User.query.filter(User.id == user_id).first()
     if u is None:
-        return {
-            'success': False,
-            'error_msg': 'User<id: {}> not exists'.format(user_id)
-        }
+        return fail('User<id: {}> not exists'.format(user_id))
     return success({
         'nickname': u.nickname,
         'avatar': u.avatar,

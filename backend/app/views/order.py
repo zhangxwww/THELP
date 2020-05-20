@@ -7,7 +7,7 @@ from app.models import User
 from app.models import Order
 
 from .utils import session_id_required, get_order, check_order_relation
-from .return_value import success, field_required, permission_denied
+from .return_value import success, field_required, permission_denied, fail
 
 
 order = Blueprint('order', __name__)
@@ -42,11 +42,9 @@ def homepage():
         'target_location': o.target_location,
         'reward': o.reward
     } for o in orders]
-    return {
-        'order_list': order_list,
-        'success': True,
-        'error_msg': ''
-    }
+    return success({
+        'order_list': order_list
+    })
 
 
 @order.route('/create', methods=['POST'])
@@ -132,10 +130,7 @@ def accept(u=None):
     if o is None:
         return ret
     if o.state != 'active':
-        return {
-            'success': False,
-            'error_msg': 'Order<id: {}> is not active'.format(order_id)
-        }
+        return fail('Order<id: {}> is not active'.format(order_id))
     o.state = 'accepted'
     o.handler = u.id
     db.session.commit()
@@ -152,10 +147,7 @@ def finish(u=None):
     if not check_order_relation(o, u, 'handler'):
         return permission_denied()
     if o.state != 'accepted':
-        return {
-            'success': False,
-            'error_msg': 'Order<id: {}> is not accepted'.format(order_id)
-        }
+        return fail('Order<id: {}> is not accepted'.format(order_id))
     o.state = 'finished'
     db.session.commit()
     return success()
@@ -171,10 +163,7 @@ def abort(u=None):
     if not check_order_relation(o, u, 'customer'):
         return permission_denied()
     if o.state != 'accepted':
-        return {
-            'success': False,
-            'error_msg': 'Order<id: {}> is not accepted'.format(order_id)
-        }
+        return fail('Order<id: {}> is not accepted'.format(order_id))
     o.state = 'active'
     db.session.commit()
     db.session.commit()
@@ -191,15 +180,20 @@ def access(u=None):
     if not check_order_relation(o, u, 'customer'):
         return permission_denied()
     if o.state != 'finished':
-        return {
-            'success': False,
-            'error_msg': 'Order<id: {}> is not finished'.format(order_id)
-        }
+        return fail('Order<id: {}> is not finished'.format(order_id))
     assess = request.json.get('assess')
     if assess is None:
         return field_required('Assess')
     o.assessment = float(assess)
-    # TODO update handler's score
+    
+    h_id = o.handler_id
+    if h_id is not None:
+        handler = User.query.filter(User.id == h_id).first()
+        if handler is not None:
+            finished = handler.finished_orders
+            score = handler.score
+            handler.score = (score * finished + assess) / (finished + 1)
+            handler.finished_orders = finished + 1
 
     db.session.commit()
     return success()
