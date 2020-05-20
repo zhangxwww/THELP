@@ -153,6 +153,7 @@ public class LoginActivity extends AppCompatActivity {
             return new BigInteger(md.digest()).toString(32);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return "";
         }
     }
 }
