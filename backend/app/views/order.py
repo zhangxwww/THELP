@@ -200,6 +200,6 @@ def access(u=None):
         return field_required('Assess')
     o.assessment = float(assess)
     # TODO update handler's score
-    
+
     db.session.commit()
     return success()
