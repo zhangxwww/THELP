@@ -10,6 +10,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestFactory {
@@ -24,9 +25,12 @@ public class RequestFactory {
         JsonObjectRequest request = new JsonObjectRequest(method, url, jsonRequest, listener, errorListener) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = super.getHeaders();
+                Map<String, String> headers;
                 if (sessionid != null) {
-                    headers.put("Set-Cookie", sessionid);
+                    headers = new HashMap<>();
+                    headers.put("Cookie", sessionid);
+                } else {
+                    headers = super.getHeaders();
                 }
                 return headers;
             }

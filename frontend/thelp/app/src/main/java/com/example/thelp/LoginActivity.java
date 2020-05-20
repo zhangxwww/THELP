@@ -87,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
             jsonObject = new JSONObject(json);
         } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
         JsonObjectRequest signupRequest = RequestFactory.getRequest(
                 Request.Method.POST,
@@ -146,6 +147,7 @@ public class LoginActivity extends AppCompatActivity {
             jsonObject = new JSONObject(json);
         } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
         JsonObjectRequest signinRequest = RequestFactory.getRequest(
                 Request.Method.POST,

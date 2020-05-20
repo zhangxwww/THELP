@@ -30,6 +30,7 @@
     <string name="titel_label">订单标题</string>
     <string name="title_label">订单名称</string>
     <string name="detail_label">详细描述</string>
+    <string name="target_location">目的地</string>
     <string name="detail_hint">输入订单详情，尽量不遗漏细节</string>
     <string name="type_label">订单类型</string>
     <string name="type_hint">请从下拉菜单中选择一种订单类型</string>
@@ -39,4 +40,14 @@
     <string name="start_time_hint">2020.7.11 17:59</string>
     <string name="button_revise_time_text">修改</string>
     <string name="end_time_label">结束时间</string>
+    <string name="submit">提交</string>
+    <string name="title_required">请输入订单标题</string>
+    <string name="title_too_long">标题过长</string>
+    <string name="target_required">请输入目的地</string>
+    <string name="detail_required">请输入订单详情</string>
+    <string name="type_required">请选择订单类型</string>
+    <string name="type_too_long">订单类型过长</string>
+    <string name="reward_required">请选择订单赏金</string>
+    <string name="start_required">请选择开始时间</string>
+    <string name="end_required">请选择结束时间</string>
 </resources>

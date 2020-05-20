@@ -5,6 +5,7 @@ from app.models import Order
 
 import os
 import time
+from datetime import datetime
 
 from .return_value import field_required, permission_denied
 
@@ -63,3 +64,8 @@ def generate_static_filename(name, type_):
     path = get_static_path(type_)
     filename = '{}.{}'.format(t, ext)
     return os.path.join(path, filename)
+
+
+def str_2_datetime(dt):
+    form = '%Y.%m.%d %H:%M'
+    return datetime.strptime(dt, form)

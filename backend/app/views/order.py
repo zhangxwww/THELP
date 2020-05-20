@@ -6,7 +6,7 @@ from app import db
 from app.models import User
 from app.models import Order
 
-from .utils import session_id_required, get_order, check_order_relation
+from .utils import session_id_required, get_order, check_order_relation, str_2_datetime
 from .return_value import success, field_required, permission_denied, fail
 
 
@@ -54,14 +54,15 @@ def create(u=None):
         'title': '',
         'description': '',
         'genre': '',
-        'state': '',
         'start_time': '',
         'end_time': '',
         'target_location': '',
-        'reward': ''
+        'reward': 0
     }
     trans_func = {
-        'reward': int
+        'reward': int,
+        'start_time': str_2_datetime,
+        'end_time': str_2_datetime
     }
     order_info = request.json.get('order_info', {})
     for k in required_fields.keys():
@@ -72,12 +73,11 @@ def create(u=None):
             field = trans_func[k](field)
         required_fields[k] = field
     required_fields['customer_id'] = u.id
+    required_fields['state'] = 'active'
     o = Order(**required_fields)
     db.session.add(o)
     db.session.commit()
-    return success({
-        'order_id': o.order_id
-    })
+    return success()
 
 
 @order.route('/edit', methods=['POST'])

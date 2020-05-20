@@ -25,9 +25,9 @@ class Order(db.Model):
     customer_id = db.Column(db.Integer)
     handler_id = db.Column(db.Integer, nullable=True)
 
-    title = db.Column(db.String(18))
+    title = db.Column(db.String(64))
     description = db.Column(db.Text)
-    genre = db.Column(db.String(10), default='other')
+    genre = db.Column(db.String(32), default='other')
     state = db.Column(db.String(10), default='active')
 
     start_time = db.Column(db.DateTime)
@@ -39,5 +39,5 @@ class Order(db.Model):
     target_location = db.Column(db.Text)
     handler_location = db.Column(db.Text, nullable=True)
 
-    reward = db.Column(db.String(32), nullable=True)
+    reward = db.Column(db.Float, default=0.0)
     assessment = db.Column(db.Float, default=5.0)
