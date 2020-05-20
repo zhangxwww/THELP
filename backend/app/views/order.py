@@ -13,7 +13,7 @@ from .return_value import success, field_required, permission_denied, fail
 order = Blueprint('order', __name__)
 
 
-@order.route('/homepage', methods=['GET'])
+@order.route('/homepage', methods=['POST'])
 def homepage():
     query = Order.query.filter(Order.state == 'active')
     start_time = request.json.get('order_start_time')

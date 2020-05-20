@@ -1,38 +1,33 @@
 package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.LayoutInflaterCompat;
-import androidx.core.view.MenuItemCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
-import com.google.android.material.button.MaterialButton;
+import com.example.request.MySingleton;
+import com.example.request.RequestFactory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.mikepenz.iconics.context.IconicsLayoutInflater2;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -45,13 +40,16 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import cn.carbs.android.avatarimageview.library.AvatarImageView;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private String avatar;
+    private String defaultAvatar;
     private Drawer drawer;
     private MaterialSearchView searchView;
     private List<Order> orderList = new ArrayList<>();
@@ -60,12 +58,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        avatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
-        setupDrawer();
+        defaultAvatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
+        setupDrawer("温斯顿", "17777777777", defaultAvatar);
         setupActionBar();
         setupSearchView();
         setupRecyclerView();
         setupAddActivityButton();
+        getUserInfo();
     }
 
     private void initOrderList() {
@@ -73,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             orderList.add(new Order("订单" + String.valueOf(i), i,
                     "类型" + String.valueOf(i % 4 + 1), "订单详情" + String.valueOf(i + 1),
                     "发布者" + String.valueOf(i + 1), "2020年7月" + String.valueOf(i) + "日",
-                    avatar));
+                    defaultAvatar));
         }
     }
 
@@ -138,7 +137,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupDrawer() {
+    private void setupDrawer(String name, String email, String avatar) {
+        if (avatar.equals("null")) {
+            avatar = defaultAvatar;
+        }
         DrawerImageLoader.init(new AbstractDrawerImageLoader() {
             @Override
             public void set(ImageView imageView, Uri uri, Drawable placeholder) {
@@ -161,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 .withOnlyMainProfileImageVisible(true)
                 .withHeaderBackground(R.color.colorBackground)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("温斯顿").withEmail("17777777777").withIcon(avatar)
+                        new ProfileDrawerItem().withName(name).withEmail(email).withIcon(avatar)
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -198,6 +200,37 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void getUserInfo() {
+        JSONObject jsonObject= new JSONObject();
+
+        String url = MainActivity.this.getString(R.string.url) + "/user/info";
+        JsonObjectRequest infoRequest = RequestFactory.getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            String name = response.getString("nickname");
+                            String avatar = response.getString("avatar");
+                            String phone = response.getString("phone");
+                            setupDrawer(name, phone, avatar);
+                        } else {
+                            CoordinatorLayout cl = findViewById(R.id.main_background);
+                            String error = response.getString("error_msg");
+                            Snackbar.make(cl, error, Snackbar.LENGTH_SHORT).show();
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("INFO", "Fail " + error.getMessage())
+        );
+        MySingleton.getInstance(this).addToRequestQueue(infoRequest);
     }
 }
 

@@ -6,7 +6,7 @@ from sqlalchemy import and_
 from app import db
 from app.models import User
 
-from .utils import session_id_required, generate_static_filename
+from .utils import session_id_required, generate_static_filename, get_user_by_session_id
 from .return_value import success, field_required, fail
 
 user = Blueprint('user', __name__)
@@ -96,17 +96,20 @@ def upload(u=None):
     return success()
 
 
-@user.route('/info', methods=['GET'])
+@user.route('/info', methods=['POST'])
 def info():
     user_id = request.json.get('user_id')
     if user_id is None:
-        return field_required('user_id')
-    u = User.query.filter(User.id == user_id).first()
+        # return field_required('user_id')
+        u = get_user_by_session_id()
+    else:
+        u = User.query.filter(User.id == user_id).first()
     if u is None:
         return fail('User<id: {}> not exists'.format(user_id))
     return success({
         'nickname': u.nickname,
         'avatar': u.avatar,
         'signature': u.signature,
-        'score': u.score
+        'score': u.score,
+        'phone': u.phone
     })

@@ -249,7 +249,7 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
                         e.printStackTrace();
                     }
                 },
-                error -> Log.d("SIGN", "Fail " + error.getMessage())
+                error -> Log.d("CREATE", "Fail " + error.getMessage())
         );
         MySingleton.getInstance(this).addToRequestQueue(addNewActivityRequest);
     }
