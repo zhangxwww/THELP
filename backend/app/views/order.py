@@ -185,7 +185,7 @@ def access(u=None):
     if assess is None:
         return field_required('Assess')
     o.assessment = float(assess)
-    
+
     h_id = o.handler_id
     if h_id is not None:
         handler = User.query.filter(User.id == h_id).first()

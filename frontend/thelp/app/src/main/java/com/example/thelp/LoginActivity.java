@@ -2,8 +2,10 @@ package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.widget.Button;
 
@@ -58,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/signup";
         Map<String, String> map = new HashMap<>();
         map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
-        map.put("password", Objects.requireNonNull(passwordEdit.getEditText()).getText().toString());
+        map.put("password", sha(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
 
 
         if (usernameEdit.getEditText().getText().length() != 11) {
@@ -86,6 +88,16 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("SIGN", String.valueOf(response));
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                onClickSigninButton();
+                            } else {
+                                // TODO
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -134,6 +146,17 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("SIGN", String.valueOf(response));
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                            } else {
+                                // TODO
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 new Response.ErrorListener() {
