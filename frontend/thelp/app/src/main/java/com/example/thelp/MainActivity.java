@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private MaterialSearchView searchView;
     private List<Order> orderList = new ArrayList<>();
 
+    private int lastPage = 0;
+
     private static final int ADD_ACTIVITY_REQUEST = 233;
 
     @Override
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         setupSearchView();
         setupRecyclerView();
         setupAddActivityButton();
+        setupRefreshLayout();
         getUserInfo();
         updateActivityList();
     }
@@ -205,6 +209,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setupRefreshLayout() {
+        SwipeRefreshLayout layout = findViewById(R.id.layout_swipe_refresh);
+        layout.setOnRefreshListener(() -> {
+            layout.setRefreshing(true);
+            updateActivityList();
+            layout.setRefreshing(false);
+        });
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -216,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getUserInfo() {
-        JSONObject jsonObject= new JSONObject();
+        JSONObject jsonObject = new JSONObject();
 
         String url = MainActivity.this.getString(R.string.url) + "/user/info";
         JsonObjectRequest infoRequest = RequestFactory.getRequest(
@@ -248,5 +261,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateActivityList() {
         Log.d("UPDATE ACTIVITY LIST", "called");
+        lastPage = 0;
+        // TODO
+        // notify
+    }
+
+    private void getMoreData() {
+        // TODO
+    }
+
+    private List<Order> requestOrderInPage(int page) {
+        // TODO send request
+        return null;
     }
 }
