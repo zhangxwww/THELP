@@ -2,7 +2,6 @@ package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +40,7 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private Drawer drawer;
     private MaterialSearchView searchView;
     private List<Order> orderList = new ArrayList<>();
+    private EndLessOnScrollListener listener;
+    private OrderAdapter adapter;
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
 
@@ -75,9 +77,14 @@ public class MainActivity extends AppCompatActivity {
     private void initOrderList() {
         for (int i = 0; i < 10; i++) {
             orderList.add(new Order("订单" + String.valueOf(i), i,
-                    "类型" + String.valueOf(i % 4 + 1), "订单详情" + String.valueOf(i + 1),
-                    "发布者" + String.valueOf(i + 1), "2020年7月" + String.valueOf(i) + "日",
-                    defaultAvatar));
+                    "类型" + String.valueOf(i % 4 + 1),
+                    "订单详情" + String.valueOf(i + 1),
+                    "发布者" + String.valueOf(i + 1),
+                    "2020年7月" + String.valueOf(i) + "日",
+                    "2020年8月" + String.valueOf(i) + "日",
+                    defaultAvatar,
+                    10,
+                    "目的地" + String.valueOf(i)));
         }
     }
 
@@ -86,14 +93,15 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        OrderAdapter adapter = new OrderAdapter(orderList);
+        adapter = new OrderAdapter(orderList);
         recyclerView.setAdapter(adapter);
-        recyclerView.addOnScrollListener(new EndLessOnScrollListener(linearLayoutManager) {
+        listener = new EndLessOnScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int currentPage) {
                 getMoreData(currentPage);
             }
-        });
+        };
+        recyclerView.addOnScrollListener(listener);
     }
 
     private void setupSearchView() {
@@ -265,28 +273,100 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateActivityList() {
         Log.d("UPDATE ACTIVITY LIST", "called");
-        // lastPage = 0;
-        // TODO
-        // notify
+        listener.reset();
+        requestOrderInPage(1, null, true);
     }
 
     private void getMoreData(int page) {
-        // TODO
         Log.d("GET MORE DATA", "" + page);
+        requestOrderInPage(page, null, false);
     }
 
-    private List<Order> requestOrderInPage(int page) {
+    private void refreshList(List<Order> orderList) {
+        this.orderList.clear();
+        this.orderList.addAll(orderList);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void showMoreOrder(List<Order> orderList) {
+        int oldSize = this.orderList.size();
+        int count = orderList.size();
+        this.orderList.addAll(orderList);
+        adapter.notifyItemRangeChanged(oldSize, count);
+    }
+
+    private void requestOrderInPage(int page, SearchCondition sc, boolean refresh) {
         // TODO send request
-        return null;
+        Map<String, String> map = new HashMap<>();
+        map.put("page", String.valueOf(page));
+        int num_each_page = MainActivity.this.getResources().getInteger(R.integer.num_each_page);
+        map.put("num_each_page", String.valueOf(num_each_page));
+        if (sc != null) {
+            map.putAll(sc.getCondition());
+        }
+        String json = new Gson().toJson(map);
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+        String url = MainActivity.this.getString(R.string.url) + "/order/homepage";
+        JsonObjectRequest request = RequestFactory.getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            JSONArray list = response.getJSONArray("order_list");
+                            int len = list.length();
+                            List<Order> orderList = new ArrayList<>();
+                            for (int i = 0; i < len; ++i) {
+                                JSONObject o = (JSONObject) list.get(i);
+                                int id = o.getInt("order_id");
+                                String title = o.getString("title");
+                                String detail = o.getString("description");
+                                String type = o.getString("genre");
+                                String employer = o.getString("customer_name");
+                                String startTime = o.getString("start_time");
+                                String endTime = o.getString("end_time");
+                                String avatar = o.getString("avatar");
+                                double reward = o.getDouble("reward");
+                                String targetLocation = o.getString("target_location");
+                                orderList.add(new Order(title, id, type, detail, employer,
+                                        startTime, endTime, avatar, reward, targetLocation));
+                            }
+                            if (refresh) {
+                                refreshList(orderList);
+                            } else {
+                                showMoreOrder(orderList);
+                            }
+                        } else {
+                            CoordinatorLayout cl = findViewById(R.id.main_background);
+                            String error = response.getString("error_msg");
+                            Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("Homepage", "Fail " + error.getMessage())
+        );
+        MySingleton.getInstance(this).addToRequestQueue(request);
+        return;
     }
 
     private abstract class EndLessOnScrollListener extends RecyclerView.OnScrollListener {
         private LinearLayoutManager linearLayoutManager;
-        private int currentPage = 0;
+        private int currentPage = 1;
         private int previousTotal = 0;
         private boolean loading = true;
 
-        public EndLessOnScrollListener(LinearLayoutManager linearLayoutManager) {
+        EndLessOnScrollListener(LinearLayoutManager linearLayoutManager) {
             this.linearLayoutManager = linearLayoutManager;
         }
 
@@ -310,6 +390,58 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        public void reset() {
+            currentPage = 1;
+            previousTotal = 0;
+            loading = true;
+        }
+
         public abstract void onLoadMore(int currentPage);
+    }
+
+    private class SearchCondition {
+        private String start_time = null, end_time = null;
+        private String location = null;
+        private int reward_inf = -1, reward_sup = -1;
+
+        Map<String, String> getCondition() {
+            Map<String, String> map = new HashMap<>();
+            if (start_time != null) {
+                map.put("order_start_time", start_time);
+            }
+            if (end_time != null) {
+                map.put("order_end_time", end_time);
+            }
+            if (location != null) {
+                map.put("order_location", location);
+            }
+            if (reward_inf >= 0) {
+                map.put("order_reward_inf", String.valueOf(reward_inf));
+            }
+            if (reward_sup >= 0) {
+                map.put("order_reward_sup", String.valueOf(reward_sup));
+            }
+            return map;
+        }
+
+        void setStart_time(String time) {
+            start_time = time;
+        }
+
+        void setEnd_time(String time) {
+            end_time = time;
+        }
+
+        void setLocation(String location) {
+            this.location = location;
+        }
+
+        void setReward_inf(int reward_inf) {
+            this.reward_inf = reward_inf;
+        }
+
+        void setReward_sup(int reward_sup) {
+            this.reward_sup = reward_sup;
+        }
     }
 }

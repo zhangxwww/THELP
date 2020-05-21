@@ -2,4 +2,5 @@
 <resources>
     <integer name="title_max_length">64</integer>
     <integer name="type_max_length">32</integer>
+    <integer name="num_each_page">10</integer>
 </resources>

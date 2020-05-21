@@ -9,7 +9,6 @@ from app.models import Order
 from .utils import session_id_required, get_order, check_order_relation, str_2_datetime
 from .return_value import success, field_required, permission_denied, fail
 
-
 order = Blueprint('order', __name__)
 
 
@@ -28,20 +27,33 @@ def homepage():
     reward_sup = request.json.get('order_reward_sup')
     if reward_inf is not None:
         query = query.filter(Order.reward >= float(reward_sup))
-    page = request.json.get('page', 1, type=int)
-    per_page = request.json.get('num_each_page', 10, type=int)
+    page = request.json.get('page', 1)
+    try:
+        page = int(page)
+    except ValueError:
+        return fail('Invalid page')
+    per_page = request.json.get('num_each_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        return fail('Invalid num each page')
     pagination = query.order_by(Order.create_time.desc()).paginate(page, per_page=per_page, error_out=False)
     orders = pagination.items
-    order_list = [{
-        'order_id': o.order_id,
-        'title': o.title,
-        'description': o.description,
-        'genre': o.genre,
-        'start_time': o.start_time,
-        'end_time': o.end_time,
-        'target_location': o.target_location,
-        'reward': o.reward
-    } for o in orders]
+    order_list = []
+    for o in orders:
+        u = User.query.filter(o.customer_id == User.id).first()
+        order_list.append({
+            'order_id': o.order_id,
+            'title': o.title,
+            'description': o.description,
+            'genre': o.genre,
+            'start_time': o.start_time,
+            'end_time': o.end_time,
+            'target_location': o.target_location,
+            'reward': o.reward,
+            'customer_name': u.nickname,
+            'avatar': u.avatar
+        })
     return success({
         'order_list': order_list
     })

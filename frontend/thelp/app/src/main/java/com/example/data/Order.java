@@ -5,18 +5,27 @@ public class Order {
     private int orderId;
     private String type;
     private String detail;
-    private String employee;
-    private String time;
+    private String employer;
+    private String startTime;
+    private String endTime;
+    private double reward;
     private String avatar;
+    private String targetLocation;
 
-    public Order(String title, int orderId, String type, String detail, String employee, String time, String avatar) {
+    public Order(String title, int orderId, String type,
+                 String detail, String employer,
+                 String start_time, String end_time,
+                 String avatar, double reward, String target_location) {
         this.title = title;
         this.orderId = orderId;
         this.type = type;
         this.detail = detail;
-        this.employee = employee;
-        this.time = time;
+        this.employer = employer;
+        this.startTime = start_time;
+        this.endTime = end_time;
         this.avatar = avatar;
+        this.reward = reward;
+        this.targetLocation = target_location;
     }
 
     public String getTitle() {
@@ -35,12 +44,12 @@ public class Order {
         return detail;
     }
 
-    public String getEmployee() {
-        return employee;
+    public String getEmployer() {
+        return employer;
     }
 
     public String getTime() {
-        return time;
+        return startTime;
     }
 
     public String getAvatar() {

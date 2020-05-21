@@ -11,8 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.thelp.R;
 import com.google.android.material.button.MaterialButton;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
@@ -55,7 +53,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.orderTitle.setText(order.getTitle());
         holder.orderType.setText(order.getType());
         holder.orderDetail.setText(order.getDetail());
-        holder.orderPublish.setText(order.getEmployee());
+        holder.orderPublish.setText(order.getEmployer());
         holder.orderTime.setText(order.getTime());
     }
 
