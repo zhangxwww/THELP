@@ -48,7 +48,12 @@
                     android:textColor="@android:color/black"
                     android:textSize="20sp" />
             </androidx.appcompat.widget.Toolbar>
-
+            <com.miguelcatalan.materialsearchview.MaterialSearchView
+                android:id="@+id/search_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_anchor="@+id/appBarLayout2"
+                app:layout_anchorGravity="center" />
         </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -60,10 +65,5 @@
         android:layout_margin="16dp"
         app:srcCompat="@drawable/ic_add_24px" />
 
-    <com.miguelcatalan.materialsearchview.MaterialSearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@+id/appBarLayout2"
-        app:layout_anchorGravity="center" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
