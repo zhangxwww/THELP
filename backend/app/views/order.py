@@ -15,6 +15,9 @@ order = Blueprint('order', __name__)
 @order.route('/homepage', methods=['POST'])
 def homepage():
     query = Order.query.filter(Order.state == 'active')
+    title = request.json.get('order_title')
+    if title is not None:
+        query = query.filter(Order.title.like('%' + title + '%'))
     start_time = request.json.get('order_start_time')
     if start_time is not None:
         query = query.filter(Order.start_time >= start_time)

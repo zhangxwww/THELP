@@ -1,5 +1,6 @@
 package com.example.thelp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Order> orderList = new ArrayList<>();
     private EndLessOnScrollListener listener;
     private OrderAdapter adapter;
+    private SearchCondition searchCondition = null;
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
 
@@ -109,13 +111,16 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //Do some magic
-                return false;
+                Log.d("Query Text Submit", "-----------");
+                searchCondition.title = query;
+                updateActivityList();
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Do some magic
+                Log.d("Query Text Change", "-----------");
                 return false;
             }
         });
@@ -124,11 +129,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSearchViewShown() {
                 //Do some magic
+                Log.d("Search View Shown", "-----------");
+                if (searchCondition == null) {
+                    searchCondition = new SearchCondition();
+                } else {
+                    searchView.setQuery(searchCondition.title, false);
+                }
             }
 
             @Override
             public void onSearchViewClosed() {
                 //Do some magic
+                Log.d("Search View Closed", "-----------");
             }
         });
     }
@@ -157,9 +169,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawer(String name, String email, String avatar) {
-        if (avatar.equals("null")) {
-            avatar = defaultAvatar;
-        }
+        avatar = defaultAvatarIfNull(avatar);
         DrawerImageLoader.init(new AbstractDrawerImageLoader() {
             @Override
             public void set(ImageView imageView, Uri uri, Drawable placeholder) {
@@ -274,12 +284,12 @@ public class MainActivity extends AppCompatActivity {
     private void updateActivityList() {
         Log.d("UPDATE ACTIVITY LIST", "called");
         listener.reset();
-        requestOrderInPage(1, null, true);
+        requestOrderInPage(1, searchCondition, true);
     }
 
     private void getMoreData(int page) {
         Log.d("GET MORE DATA", "" + page);
-        requestOrderInPage(page, null, false);
+        requestOrderInPage(page, searchCondition, false);
     }
 
     private void refreshList(List<Order> orderList) {
@@ -334,6 +344,7 @@ public class MainActivity extends AppCompatActivity {
                                 String startTime = o.getString("start_time");
                                 String endTime = o.getString("end_time");
                                 String avatar = o.getString("avatar");
+                                avatar = defaultAvatarIfNull(avatar);
                                 double reward = o.getDouble("reward");
                                 String targetLocation = o.getString("target_location");
                                 orderList.add(new Order(title, id, type, detail, employer,
@@ -357,10 +368,16 @@ public class MainActivity extends AppCompatActivity {
                 error -> Log.d("Homepage", "Fail " + error.getMessage())
         );
         MySingleton.getInstance(this).addToRequestQueue(request);
-        return;
     }
 
-    private abstract class EndLessOnScrollListener extends RecyclerView.OnScrollListener {
+    private String defaultAvatarIfNull(String avatar) {
+        if (avatar == null || avatar.equals("null")) {
+            return defaultAvatar;
+        }
+        return avatar;
+    }
+
+    private abstract static class EndLessOnScrollListener extends RecyclerView.OnScrollListener {
         private LinearLayoutManager linearLayoutManager;
         private int currentPage = 1;
         private int previousTotal = 0;
@@ -371,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
 
             int visibleItemCount = recyclerView.getChildCount();
@@ -390,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public void reset() {
+        void reset() {
             currentPage = 1;
             previousTotal = 0;
             loading = true;
@@ -400,9 +417,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class SearchCondition {
-        private String start_time = null, end_time = null;
-        private String location = null;
-        private int reward_inf = -1, reward_sup = -1;
+        public String start_time = null, end_time = null;
+        public String title = null;
+        public String location = null;
+        public int reward_inf = -1, reward_sup = -1;
 
         Map<String, String> getCondition() {
             Map<String, String> map = new HashMap<>();
@@ -411,6 +429,9 @@ public class MainActivity extends AppCompatActivity {
             }
             if (end_time != null) {
                 map.put("order_end_time", end_time);
+            }
+            if (title != null) {
+                map.put("order_title", title);
             }
             if (location != null) {
                 map.put("order_location", location);
@@ -422,26 +443,6 @@ public class MainActivity extends AppCompatActivity {
                 map.put("order_reward_sup", String.valueOf(reward_sup));
             }
             return map;
-        }
-
-        void setStart_time(String time) {
-            start_time = time;
-        }
-
-        void setEnd_time(String time) {
-            end_time = time;
-        }
-
-        void setLocation(String location) {
-            this.location = location;
-        }
-
-        void setReward_inf(int reward_inf) {
-            this.reward_inf = reward_inf;
-        }
-
-        void setReward_sup(int reward_sup) {
-            this.reward_sup = reward_sup;
         }
     }
 }
