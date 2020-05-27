@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         setupRefreshLayout();
         getUserInfo();
         updateActivityList();
+
     }
 
     private void initOrderList() {

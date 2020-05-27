@@ -7,4 +7,9 @@
     <color name="colorOnPrimary">#442C2E</color>
     <color name="colorBackground">#F7F7F7</color>
     <color name="colordarkBackground">#062D45</color>
+    <color name="colorGreen">#7EA00E</color>
+    <color name="colorBlue">#378FDC</color>
+    <color name="colorGrey">#666666</color>
+
+
 </resources>
