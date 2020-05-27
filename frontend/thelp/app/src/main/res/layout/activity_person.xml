@@ -13,10 +13,11 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
+            android:layout_marginStart="25dp"
             android:layout_marginTop="25dp"
-            android:background=""
-            android:src="@drawable/ic_arrow_back_24px_black"/>
+            android:background="@color/colorBackground"
+            android:src="@drawable/ic_arrow_back_24px_black"
+            android:contentDescription="TODO" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -68,8 +69,9 @@
                     <ImageButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background=""
-                        android:src="@drawable/ic_phone_24px_black" />
+                        android:background="@color/colorBackground"
+                        android:src="@drawable/ic_phone_24px_black"
+                        android:contentDescription="TODO" />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -82,8 +84,9 @@
                     <ImageButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background=""
-                        android:src="@drawable/ic_textsms_24px_black" />
+                        android:background="@color/colorBackground"
+                        android:src="@drawable/ic_textsms_24px_black"
+                        android:contentDescription="TODO" />
                 </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
@@ -105,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="@color/md_black_1000"
+                android:textColor="@color/colorOnPrimary"
                 android:text="winston0301"/>
 
             <TextView
@@ -127,7 +130,7 @@
                         android:id="@+id/phone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/md_black_1000"
+                        android:textColor="@color/colorOnPrimary"
                         android:textStyle="bold"
                         android:textSize="20sp"
                         android:text="17777777777"/>
@@ -163,7 +166,7 @@
                         android:id="@+id/signature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/md_black_1000"
+                        android:textColor="@color/colorOnPrimary"
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:layout_marginEnd="50dp"
@@ -198,7 +201,7 @@
                         android:id="@+id/signature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/md_black_1000"
+                        android:textColor="@color/colorOnPrimary"
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:layout_marginEnd="50dp"
