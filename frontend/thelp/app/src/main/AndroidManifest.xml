@@ -15,6 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".PersonActivity"></activity>
+        <activity android:name=".AddActivity"></activity>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="7WkhGAbZeg71QOYF4M5b9ubG03ONwj4R" />
@@ -22,13 +24,13 @@
         </activity>
         <activity android:name=".HandlerDetailActivity">
         </activity>
-        <activity android:name=".AddActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -38,5 +40,8 @@
         </activity>
         <activity android:name=".LoginActivity" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>
