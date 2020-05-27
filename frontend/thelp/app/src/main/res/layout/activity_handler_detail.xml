@@ -37,57 +37,68 @@
             android:id="@+id/detail_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="32dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
             android:orientation="vertical" >
 
             <LinearLayout
                 android:id="@+id/order_title_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:weightSum="8"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/order_title_tv"
-                    android:layout_width="0dp"
-                    android:layout_weight="7"
-                    android:layout_height="wrap_content"
-                    android:text="OrderTitle"
-                    android:textColor="#000000"
-                    android:textSize="40dp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/eat_imageView"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    app:srcCompat="@drawable/ic_restaurant_24px" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/order_title_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="移动开发课送餐"
+                        android:textColor="@color/colorOnPrimary"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="5sp"
+                        android:gravity="center">
+                        <ImageView
+                            android:id="@+id/eat_imageView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_restaurant_24px"/>
+                    </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
 
             <LinearLayout
                 android:id="@+id/order_location_time_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:weightSum="8"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/order_location_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="清华大学文北楼"
+                        android:textColor="@color/colorOnPrimary" />
 
-                <TextView
-                    android:id="@+id/order_location_tv"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:layout_height="wrap_content"
-                    android:text="OrderLoacation"
-                    android:textColor="#333333" />
-
-                <TextView
-                    android:id="@+id/order_time_tv"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:layout_height="wrap_content"
-                    android:text="OrderTime"
-                    android:textColor="#333333" />
+                    <TextView
+                        android:id="@+id/order_time_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2020-5-24 18:00"
+                        android:layout_alignParentEnd="true"
+                        android:textColor="@color/colorOnPrimary" />
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -101,8 +112,7 @@
 
                 <ImageView
                     android:id="@+id/reward_imageView"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     app:srcCompat="@drawable/ic_monetization_on_black_24dp" />
                 <TextView
@@ -111,21 +121,24 @@
                     android:layout_weight="7"
                     android:layout_height="wrap_content"
                     android:text="20"
-                    android:textColor="#000000"
-                    android:textSize="30dp" />
+                    android:textColor="@color/colorAccentVariant"
+                    android:fontFamily="@font/gotham"
+                    android:textStyle="bold"
+                    android:textSize="20dp" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/order_details_tv"
                 android:layout_width="match_parent"
-                android:layout_height="95dp"
-                android:text="OrderDetails"
-                android:textColor="#555555" />
+                android:layout_height="wrap_content"
+                android:textSize="16dp"
+                android:text="@string/detail_long_placeholder" />
+
             <LinearLayout
                 android:id="@+id/order_create_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
                 android:orientation="horizontal">
                 <cn.carbs.android.avatarimageview.library.AvatarImageView
@@ -140,9 +153,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:text="温斯顿"
-                    android:textColor="#000000"
+                    android:textColor="@color/colorPrimaryVariant"
                     android:layout_gravity="center_vertical"
-                    android:textSize="20dp" />
+                    android:textSize="18dp"
+                    android:textStyle="bold"/>
                 <TextView
                     android:id="@+id/tv1"
                     android:layout_width="wrap_content"
@@ -151,7 +165,7 @@
                     android:text="发布于"
                     android:textColor="#666666"
                     android:layout_gravity="center_vertical"
-                    android:textSize="20dp" />
+                    android:textSize="18dp" />
                 <TextView
                     android:id="@+id/order_ctime_tv"
                     android:layout_width="wrap_content"
@@ -160,25 +174,24 @@
                     android:text="16:52"
                     android:textColor="#666666"
                     android:layout_gravity="center_vertical"
-                    android:textSize="20dp" />
+                    android:textSize="18dp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/order_button_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
                 android:weightSum="8"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/button"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2.5"
-                    android:textSize="20dp"
-                    android:backgroundTint="@color/colorGreen"
+                    android:textSize="18sp"
+                    android:backgroundTint="@color/colorAccent"
                     android:text="@string/accept_order_button_text" />
 
             </LinearLayout>
