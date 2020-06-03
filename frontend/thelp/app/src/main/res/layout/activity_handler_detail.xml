@@ -29,7 +29,7 @@
         android:layout_height="662dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/frame"
-        app:behavior_hideable="true"
+        app:behavior_hideable="false"
         app:behavior_peekHeight="500dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
@@ -37,15 +37,22 @@
             android:id="@+id/detail_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
             android:layout_marginStart="25dp"
             android:layout_marginEnd="25dp"
             android:orientation="vertical" >
-
+            <LinearLayout
+                android:layout_marginTop="8dp"
+                android:layout_width="60dp"
+                android:layout_height="8dp"
+                android:layout_gravity="center"
+                android:background="@drawable/frame2"
+                android:backgroundTint="@color/colorGrey">
+            </LinearLayout>
             <LinearLayout
                 android:id="@+id/order_title_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:layout_marginBottom="10dp"
                 android:orientation="horizontal">
                 <RelativeLayout
@@ -130,7 +137,8 @@
             <TextView
                 android:id="@+id/order_details_tv"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="180dp"
+                android:scrollbars="vertical"
                 android:textSize="16dp"
                 android:text="@string/detail_long_placeholder" />
 

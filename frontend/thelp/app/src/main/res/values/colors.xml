@@ -10,6 +10,8 @@
     <color name="colorGreen">#7EA00E</color>
     <color name="colorBlue">#378FDC</color>
     <color name="colorGrey">#666666</color>
+    <color name="colorLightGrey">#dddddd</color>
+
 
 
 </resources>
