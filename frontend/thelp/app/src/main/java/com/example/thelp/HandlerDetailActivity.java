@@ -3,6 +3,7 @@ package com.example.thelp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,13 +28,19 @@ public class HandlerDetailActivity extends AppCompatActivity {
         bottomSheet = findViewById(R.id.bottom_sheet);
         behavior = BottomSheetBehavior.from(bottomSheet);
         aiv = (AvatarImageView) this.findViewById(R.id.order_avatar_image);
-        TextView detailsTv = findViewById(R.id.order_details_tv);
-        detailsTv.setText("薛定谔的猫（英文名称：Erwin Schrödinger's Cat）是奥地利著名物理学家薛定谔（Erwin Schrödinger, 1887年8月12日～1961年1月4日）提出的一个思想实验，是指将一只猫关在装有少量镭和氰化物的密闭容器里。镭的衰变存在几率，如果镭发生衰变，会触发机关打碎装有氰化物的瓶子，猫就会死；如果镭不发生衰变，猫就存活。根据量子力学理论，由于放射性的镭处于衰变和没有衰变两种状态的叠加，猫就理应处于死猫和活猫的叠加状态。");
+        setBottomSheet();
         Glide
                 .with(this)
                 .load(picUrl)
                 .centerCrop()
                 .into(aiv);
+    }
+
+    void setBottomSheet(){
+        TextView detailsTv = findViewById(R.id.order_details_tv);
+        ViewGroup.LayoutParams lp = detailsTv.getLayoutParams();
+        detailsTv.setMovementMethod(ScrollingMovementMethod.getInstance());
+        int oldHeight = lp.height;
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, @BottomSheetBehavior.State int newState) {
@@ -44,34 +51,26 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         break;
                     case 2:
                         state = "STATE_SETTLING"; // 视图从脱离手指自由滑动到最终停下的这一小段时间
+                        lp.height = oldHeight;
+                        detailsTv.setLayoutParams(lp);
                         break;
                     case 3:
                         state = "STATE_EXPANDED"; //处于完全展开的状态
-                        Log.d("state", "expanded:" );
+//                        Log.d("state", "expanded:" );
+//                        TextView detailsTv = findViewById(R.id.order_details_tv);
+//                        int oldH = detailsTv.getHeight();
+//                        Log.d("oldHeight", "height:"+oldH );
+//                        Log.d("getLineCount", "height:"+detailsTv.getLineCount() );
+//                        Log.d("getLineHeight", "height:"+detailsTv.getLineHeight() );
 
-                        TextView detailsTv = findViewById(R.id.order_details_tv);
-                        int oldH = detailsTv.getHeight();
-                        Log.d("oldHeight", "height:"+oldH );
-                        Log.d("getLineCount", "height:"+detailsTv.getLineCount() );
-                        Log.d("getLineHeight", "height:"+detailsTv.getLineHeight() );
-
-
-
-                        ViewGroup.LayoutParams lp = detailsTv.getLayoutParams();
-                        int height_in_pixels = detailsTv.getLineCount() * detailsTv.getLineHeight(); //approx height text
-                        lp.height = height_in_pixels;
+                        lp.height = oldHeight+300;
                         detailsTv.setLayoutParams(lp);
-                        int newH = detailsTv.getHeight();
-                        Log.d("newHeight", "height:"+newH );
+//                        int newH = detailsTv.getHeight();
+//                        Log.d("newHeight", "height:"+newH );
                         break;
                     case 4:
                         state = "STATE_COLLAPSED"; //默认的折叠状态
-
-                        detailsTv = findViewById(R.id.order_details_tv);
-
-                        lp = detailsTv.getLayoutParams();
-                        int newHeight = 5 * detailsTv.getLineHeight()+20; //approx height text
-                        lp.height = newHeight;
+                        lp.height = oldHeight;
                         detailsTv.setLayoutParams(lp);
                         break;
                     case 5:
@@ -84,5 +83,6 @@ public class HandlerDetailActivity extends AppCompatActivity {
 //                Log.d("BottomSheetDemo", "slideOffset:" + slideOffset);
             }
         });
+
     }
 }

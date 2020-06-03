@@ -22,7 +22,7 @@
         android:layout_height="662dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/frame"
-        app:behavior_hideable="true"
+        app:behavior_hideable="false"
         app:behavior_peekHeight="500dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
@@ -30,13 +30,22 @@
             android:id="@+id/detail_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="32dp"
+            android:layout_marginLeft="36dp"
+            android:layout_marginRight="36dp"
             android:orientation="vertical" >
+            <LinearLayout
+                android:layout_marginTop="8dp"
+                android:layout_width="60dp"
+                android:layout_height="8dp"
+                android:layout_gravity="center"
+                android:background="@drawable/frame2"
+                android:backgroundTint="@color/colorGrey">
+            </LinearLayout>
             <LinearLayout
                 android:id="@+id/order_create_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginBottom="10dp"
                 android:weightSum="8"
                 android:orientation="horizontal">
