@@ -53,6 +53,8 @@
     <string name="accept_order_button_text">接单</string>
     <string name="assess">订单完成！给您的接单人打个分吧！</string>
     <string name="message">消息</string>
+    <string name="message_read">已读消息</string>
+    <string name="message_unread">未读消息</string>
     <string name="appeal">申诉</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

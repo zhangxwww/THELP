@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +28,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         TextView time;
         TextView content;
         ImageView isRead;
+        LinearLayout separator;
 
         public ViewHolder(View view) {
             super(view);
@@ -35,6 +37,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             time = view.findViewById(R.id.time);
             content = view.findViewById(R.id.content);
             isRead = view.findViewById(R.id.is_read);
+            separator = view.findViewById(R.id.separator);
         }
     }
 
@@ -68,6 +71,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.isRead.setVisibility(View.INVISIBLE);
         }else{
             holder.isRead.setVisibility(View.VISIBLE);
+        }
+
+        if (position == messageList.size() - 1){
+            holder.separator.setVisibility(View.INVISIBLE);
         }
     }
 
