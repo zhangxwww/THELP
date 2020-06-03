@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private Drawer drawer;
     private MaterialSearchView searchView;
     private List<Order> orderList = new ArrayList<>();
-    private EndLessOnScrollListener listener;
+    private EndlessOnScrollListener listener;
     private OrderAdapter adapter;
     private SearchCondition searchCondition = null;
 
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new OrderAdapter(orderList);
         recyclerView.setAdapter(adapter);
-        listener = new EndLessOnScrollListener(linearLayoutManager) {
+        listener = new EndlessOnScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int currentPage) {
                 getMoreData(currentPage);
@@ -376,45 +376,6 @@ public class MainActivity extends AppCompatActivity {
             return defaultAvatar;
         }
         return avatar;
-    }
-
-    private abstract static class EndLessOnScrollListener extends RecyclerView.OnScrollListener {
-        private LinearLayoutManager linearLayoutManager;
-        private int currentPage = 1;
-        private int previousTotal = 0;
-        private boolean loading = true;
-
-        EndLessOnScrollListener(LinearLayoutManager linearLayoutManager) {
-            this.linearLayoutManager = linearLayoutManager;
-        }
-
-        @Override
-        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            int visibleItemCount = recyclerView.getChildCount();
-            int totalItemCount = linearLayoutManager.getItemCount();
-            int firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
-            if (loading) {
-                if (totalItemCount > previousTotal) {
-                    loading = false;
-                    previousTotal = totalItemCount;
-                }
-            }
-            if (!loading && totalItemCount - visibleItemCount <= firstVisibleItem) {
-                ++currentPage;
-                onLoadMore(currentPage);
-                loading = true;
-            }
-        }
-
-        void reset() {
-            currentPage = 1;
-            previousTotal = 0;
-            loading = true;
-        }
-
-        public abstract void onLoadMore(int currentPage);
     }
 
     private class SearchCondition {
