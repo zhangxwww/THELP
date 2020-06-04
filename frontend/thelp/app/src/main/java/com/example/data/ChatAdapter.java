@@ -1,6 +1,7 @@
 package com.example.data;
 
 import android.app.Activity;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private Activity activity;
     private int sendLayout;
     private int receiveLayout;
+    private OnItemClickedListener onItemClickedListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private SquareAvatarImageView avatarView;
@@ -36,12 +38,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private TextView timeView;
 
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, ChatAdapter.OnItemClickedListener clickListener) {
             super(view);
             avatarView = view.findViewById(R.id.chat_avatar);
             bubbleTextView = view.findViewById(R.id.chat_content_text);
             bubbleImageView = view.findViewById(R.id.chat_content_image);
             timeView = view.findViewById(R.id.chat_time);
+
+            // set listeners
+            avatarView.setOnClickListener(v -> clickListener.onAvatarClicked(getAdapterPosition()));
+            bubbleImageView.setOnClickListener(v -> clickListener.onImageClicked(bubbleImageView, getAdapterPosition()));
         }
     }
 
@@ -63,7 +69,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             throw new InvalidParameterException("Invalid message type error(receive/send)");
         }
         View view = LayoutInflater.from(parent.getContext()).inflate(viewLayout, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, this.onItemClickedListener);
     }
 
     @Override
@@ -81,7 +87,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             holder.bubbleTextView.setVisibility(View.VISIBLE);
             holder.bubbleImageView.setVisibility(View.GONE);
         } else if (message.getType() == Message.IMAGE) {
-            Glide.with(activity).load(message.getFullContent()).centerCrop().into(holder.bubbleImageView);
+            Glide.with(activity).load(message.getFullContent()).into(holder.bubbleImageView);
             holder.bubbleImageView.setVisibility(View.VISIBLE);
             holder.bubbleTextView.setVisibility(View.GONE);
         } else {
@@ -92,5 +98,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return messageList.size();
+    }
+
+    public void setClickListener(OnItemClickedListener listener) {
+        this.onItemClickedListener = listener;
+    }
+
+    public interface OnItemClickedListener {
+        void onAvatarClicked(int position);
+        void onImageClicked(View view, int position);
     }
 }

@@ -61,4 +61,8 @@ dependencies {
     implementation 'com.stepstone.stepper:material-stepper:4.3.1'
     implementation files('libs/BaiduLBS_Android.jar')
     implementation 'com.github.lguipeng:BubbleView:1.0.1'
+    implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.5.8'
+    implementation 'com.jakewharton:butterknife:10.2.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
+    implementation 'org.greenrobot:eventbus:3.2.0'
 }

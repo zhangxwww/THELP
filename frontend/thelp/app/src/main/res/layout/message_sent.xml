@@ -46,7 +46,7 @@
         <com.github.library.bubbleview.BubbleImageView
             android:id="@+id/chat_content_image"
             android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_height="wrap_content"
             android:layout_toStartOf="@id/chat_avatar"
             android:scaleType="centerCrop"
             android:visibility="gone"

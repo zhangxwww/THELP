@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".FullImageActivity"></activity>
         <activity android:name=".ChatActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,12 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HistoryActivity"></activity>
-        <activity android:name=".PersonActivity"></activity>
+        <activity android:name=".HistoryActivity" />
+        <activity android:name=".PersonActivity" />
         <activity android:name=".AddActivity" />
-
         <activity android:name=".CustomerDetailActivity" />
-
         <activity android:name=".HandlerDetailActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -36,18 +35,17 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".LoginActivity" />
-        <activity android:name=".AssessActivity"></activity>
-        <activity android:name=".MessageActivity">
+        <activity android:name=".AssessActivity" />
+        <activity android:name=".MessageActivity"></activity>
 
-        </activity>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="7WkhGAbZeg71QOYF4M5b9ubG03ONwj4R" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

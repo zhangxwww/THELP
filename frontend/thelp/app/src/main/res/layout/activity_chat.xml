@@ -39,7 +39,7 @@
                         android:layout_centerInParent="true"
                         android:layout_gravity="center"
                         android:fontFamily="@font/gotham"
-                        android:text="@string/title"
+                        android:text="张欣炜"
                         android:textColor="@android:color/white"
                         android:textSize="20sp" />
                 </androidx.appcompat.widget.Toolbar>
