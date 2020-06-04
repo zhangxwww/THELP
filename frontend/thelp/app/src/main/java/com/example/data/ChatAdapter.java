@@ -92,6 +92,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             holder.bubbleTextView.setVisibility(View.GONE);
         } else {
             // TODO: raise error
+            throw new InvalidParameterException("invalid message type(text/image)");
         }
     }
 
