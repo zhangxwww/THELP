@@ -6,6 +6,7 @@ android {
     repositories {
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -59,4 +60,5 @@ dependencies {
     implementation 'com.jzxiang.pickerview:TimePickerDialog:1.0.1'
     implementation 'com.stepstone.stepper:material-stepper:4.3.1'
     implementation files('libs/BaiduLBS_Android.jar')
+    implementation 'com.github.lguipeng:BubbleView:1.0.1'
 }

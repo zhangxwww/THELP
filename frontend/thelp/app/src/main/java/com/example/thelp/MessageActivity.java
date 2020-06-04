@@ -56,11 +56,11 @@ public class MessageActivity extends AppCompatActivity {
     private void getMsgList(){
         for (int i = 0; i < 3; i++) {
             String picUrl = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
-            messageList_unread.add(new Message(picUrl,"昵称"+String.valueOf(i), "订单奖励多少呀呀呀？", "00:00", false));
+            messageList_unread.add(new Message(picUrl,"昵称"+String.valueOf(i), "订单奖励多少呀呀呀？", "00:00", false, Message.TEXT, Message.RECEIVE));
         }
         for (int i = 3; i < 5; i++) {
             String picUrl = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
-            messageList_read.add(new Message(picUrl,"昵称"+String.valueOf(i+3), "给个好评兄弟？", "12:00", true));
+            messageList_read.add(new Message(picUrl,"昵称"+String.valueOf(i+3), "给个好评兄弟？", "12:00", true, Message.TEXT, Message.RECEIVE));
         }
     }
 }
