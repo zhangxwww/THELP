@@ -28,6 +28,7 @@ def get_order(order_id):
             'success': False,
             'error_msg': 'Order<id: {}> not exists'.format(order_id)
         }
+    return o, None
 
 
 def check_order_relation(o, u, relation):

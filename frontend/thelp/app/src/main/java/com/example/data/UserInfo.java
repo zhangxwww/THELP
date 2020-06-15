@@ -1,5 +1,8 @@
 package com.example.data;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class UserInfo {
 
     public int userId;
@@ -19,4 +22,13 @@ public class UserInfo {
         this.score = score;
     }
 
+    public static UserInfo parseFromJSONResponse(JSONObject response) throws JSONException {
+        String name = response.getString("nickname");
+        String avatar = response.getString("avatar");
+        String phone = response.getString("phone");
+        int userId = response.getInt("user_id");
+        String signature = response.getString("signature");
+        double score = response.getDouble("score");
+        return new UserInfo(userId, phone, name, avatar, signature, score);
+    }
 }

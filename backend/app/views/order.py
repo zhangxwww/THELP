@@ -215,3 +215,35 @@ def access(u=None):
 
     db.session.commit()
     return success()
+
+
+@order.route('/detail', methods=['POST'])
+def detail():
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    customer = User.query.filter(o.customer_id == User.id).first()
+    res = {
+        'customer_id': o.customer_id,
+        'customer': customer.nickname,
+        'title': o.title,
+        'description': o.description,
+        'genre': o.genre,
+        'state': o.state,
+        'start_time': o.start_time,
+        'end_time': o.end_time,
+        'create_time': o.create_time,
+        'accept_time': o.accept_time,
+        'finish_time': o.finish_time,
+        'target_location': o.target_location,
+        'handler_location': o.handler_location,
+        'reward': o.reward,
+        'assessment': o.assessment
+    }
+    if o.handler_id is not None:
+        handler = User.query.filter(o.handler_id == User.id).first()
+        if handler is not None:
+            res['handler_id'] = o.handler_id
+            res['handler'] = handler.nickname
+    return success(res)

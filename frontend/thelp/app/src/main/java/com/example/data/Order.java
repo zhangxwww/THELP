@@ -1,17 +1,42 @@
 package com.example.data;
 
+import com.example.thelp.CustomerDetailActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Order {
-    private String title;
-    private int orderId;
-    private String type;
-    private String detail;
-    private String employer;
-    private int employer_id;
-    private String startTime;
-    private String endTime;
-    private double reward;
-    private String avatar;
-    private String targetLocation;
+    public int orderId;
+
+    public int employer_id;
+    public int employee_id;
+
+    public String avatar;
+
+    public String employer;
+    public String employee;
+
+    public String title;
+    public String detail;
+
+    public String type;
+    public String state;
+
+    public String startTime;
+    public String endTime;
+    public String createTime;
+    public String acceptTime;
+    public String finishTime;
+
+    public double reward;
+    public double assessment;
+
+    public String targetLocation;
+    public String handlerLocation;
+
+    public Order() {
+
+    }
 
     public Order(String title, int orderId, String type,
                  String detail, String employer, int employer_id,
@@ -28,6 +53,38 @@ public class Order {
         this.avatar = avatar;
         this.reward = reward;
         this.targetLocation = target_location;
+    }
+
+    public static Order parseFromJSONResponse(JSONObject response, int orderId) throws JSONException {
+        Order order = new Order();
+        order.orderId = orderId;
+        order.employer_id = response.getInt("customer_id");
+        if (response.has("handler_id")) {
+            order.employee_id = response.getInt("handler_id");
+        } else {
+            order.employee_id = -1;
+        }
+        order.employer = response.getString("customer");
+        if (response.has("handler")) {
+            order.employee = response.getString("handler");
+        } else {
+            order.employee = null;
+        }
+        order.title = response.getString("title");
+        order.detail = response.getString("description");
+        order.type = response.getString("genre");
+        order.state = response.getString("state");
+        order.startTime = response.getString("start_time");
+        order.endTime = response.getString("end_time");
+        order.createTime = response.getString("create_time");
+        order.acceptTime = response.getString("accept_time");
+        order.finishTime = response.getString("finish_time");
+        order.reward = response.getDouble("reward");
+        order.assessment = response.getDouble("assessment");
+        order.targetLocation = response.getString("target_location");
+        order.handlerLocation = response.getString("handler_location");
+
+        return order;
     }
 
     public String getTitle() {

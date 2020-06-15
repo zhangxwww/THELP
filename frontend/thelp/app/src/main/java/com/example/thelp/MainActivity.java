@@ -267,27 +267,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getUserInfoFromRemote() {
-        JSONObject jsonObject = new JSONObject();
 
-        String url = MainActivity.this.getString(R.string.url) + "/user/info";
-        JsonObjectRequest infoRequest = RequestFactory.getRequest(
-                Request.Method.POST,
-                url,
-                jsonObject,
+        JsonObjectRequest infoRequest = RequestFactory.getUserInfoRequest(
+                null,
+                MainActivity.this.getString(R.string.url),
                 response -> {
                     try {
                         boolean success = response.getBoolean("success");
                         if (success) {
-                            String name = response.getString("nickname");
-                            String avatar = response.getString("avatar");
-                            String phone = response.getString("phone");
-                            int userId = response.getInt("user_id");
-                            String signature = response.getString("signature");
-                            double score = response.getDouble("score");
                             myApplication myApp = (myApplication)getApplicationContext();
-                            myApp.setUserInfo(new UserInfo(userId, phone, name,
-                                    defaultAvatarIfNull(avatar), signature, score));
-                            setupDrawer(name, phone, avatar);
+                            UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
+                            myApp.setUserInfo(userInfo);
+                            setupDrawer(userInfo.nickName, userInfo.phone, userInfo.avatar);
                         } else {
                             CoordinatorLayout cl = findViewById(R.id.main_background);
                             String error = response.getString("error_msg");
@@ -300,7 +291,10 @@ public class MainActivity extends AppCompatActivity {
                 },
                 error -> Log.d("INFO", "Fail " + error.getMessage())
         );
-        MySingleton.getInstance(this).addToRequestQueue(infoRequest);
+
+        if (infoRequest != null) {
+            MySingleton.getInstance(this).addToRequestQueue(infoRequest);
+        }
     }
 
     private void updateActivityList() {
