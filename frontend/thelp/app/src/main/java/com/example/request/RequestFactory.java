@@ -17,8 +17,17 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 
 public class RequestFactory {
     private static String sessionid = null;
@@ -135,5 +144,23 @@ public class RequestFactory {
                 listener,
                 errorListener
         );
+    }
+
+    public static void uploadFile(File file, String ip, Callback callback) {
+        OkHttpClient client = new OkHttpClient();
+        MediaType contentType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.getName(), RequestBody.create(contentType, file))
+                .build();
+        // RequestBody body = RequestBody.create(contentType, file);
+        String url = ip + "/user/upload";
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("cookie", sessionid)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(callback);
     }
 }

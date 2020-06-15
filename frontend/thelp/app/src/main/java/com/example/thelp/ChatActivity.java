@@ -35,6 +35,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.OkHttpClient;
 
 // TODO: 修改这个方法从websocket获取数据
 public class ChatActivity extends AppCompatActivity {

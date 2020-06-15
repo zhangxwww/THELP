@@ -6,7 +6,10 @@ from sqlalchemy import and_
 from app import db
 from app.models import User
 
-from .utils import session_id_required, generate_static_filename, get_user_by_session_id
+from .utils import session_id_required
+from .utils import generate_static_filename
+from .utils import get_user_by_session_id
+from .utils import static_filename_2_url
 from .return_value import success, field_required, fail
 
 user = Blueprint('user', __name__)
@@ -87,7 +90,7 @@ def edit(u=None):
     return success()
 
 
-@user.route('/upload_avatar', methods=['POST'])
+@user.route('/upload', methods=['POST'])
 @session_id_required
 def upload(u=None):
     f = request.files.get('file')
@@ -95,7 +98,7 @@ def upload(u=None):
         return field_required('File')
     filename = generate_static_filename(f.filename, 'avatar')
     f.save(filename)
-    u.avatar = filename
+    u.avatar = static_filename_2_url(filename, 'avatar')
     db.session.commit()
     return success()
 

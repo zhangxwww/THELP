@@ -75,4 +75,6 @@
     <string name="order_accepted">accepted</string>
     <string name="order_finished">finished</string>
     <string name="order_canceled">canceled</string>
+    <string name="upload_succeed">上传成功</string>
+    <string name="upload_failed">上传失败</string>
 </resources>

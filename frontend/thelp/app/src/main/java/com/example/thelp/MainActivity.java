@@ -264,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void getUserInfo() {
         if (!getUserInfoFromLocal()) {
+            UserInfo.setUrl(getResources().getString(R.string.url));
             getUserInfoFromRemote();
         }
     }
@@ -286,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         boolean success = response.getBoolean("success");
                         if (success) {
-                            myApplication myApp = (myApplication)getApplicationContext();
+                            myApplication myApp = (myApplication) getApplicationContext();
                             UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
                             myApp.setUserInfo(userInfo);
                             setupDrawer(userInfo.nickName, userInfo.phone, userInfo.avatar);

@@ -3,10 +3,14 @@ package com.example.thelp;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.LoginFilter;
 import android.util.Log;
@@ -20,9 +24,14 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.carbs.android.avatarimageview.library.AvatarImageView;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
+import com.example.data.GlideEngine;
+import com.example.data.Message;
 import com.example.data.Order;
 import com.example.data.UserInfo;
 import com.example.request.MySingleton;
@@ -31,16 +40,25 @@ import com.example.util.SHA;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.luck.picture.lib.PictureSelector;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.listener.OnResultCallbackListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.Signature;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class PersonActivity extends AppCompatActivity {
 
@@ -260,6 +278,48 @@ public class PersonActivity extends AppCompatActivity {
                     .setPositiveButton("取消", null)
                     .show();
         });
+
+        avatarView.setOnClickListener(v -> {
+            PictureSelector.create(this)
+                    .openGallery(PictureMimeType.ofAll())
+                    .loadImageEngine(GlideEngine.createGlideEngine())
+                    .maxSelectNum(1)
+                    .minSelectNum(1)
+                    .forResult(new OnResultCallbackListener<LocalMedia>() {
+                        @Override
+                        public void onResult(List<LocalMedia> result) {
+                            if (result.size() > 0) {
+                                CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
+                                String photoPath = result.get(0).getRealPath();
+
+                                new Thread(() -> {
+                                    File file = new File(photoPath);
+                                    RequestFactory.uploadFile(
+                                            file,
+                                            getResources().getString(R.string.url),
+                                            new Callback() {
+                                                @Override
+                                                public void onFailure(Call call, IOException e) {
+                                                    e.printStackTrace();
+                                                    Snackbar.make(cl, getResources().getString(R.string.upload_failed), Snackbar.LENGTH_LONG).show();
+                                                }
+
+                                                @Override
+                                                public void onResponse(Call call, Response response) throws IOException {
+                                                    Snackbar.make(cl, getResources().getString(R.string.upload_succeed), Snackbar.LENGTH_LONG).show();
+                                                    updateUserInfo();
+                                                }
+                                            });
+                                }).start();
+                            }
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            // onCancel Callback
+                        }
+                    });
+        });
     }
 
     private void showUserInfo() {
@@ -274,6 +334,36 @@ public class PersonActivity extends AppCompatActivity {
         scoreView.setText(String.valueOf(userInfo.score));
         phoneView.setText(userInfo.phone);
         signatureView.setText(userInfo.signature);
+    }
+
+    private void updateUserInfo() {
+        JsonObjectRequest infoRequest = RequestFactory.getUserInfoRequest(
+                null,
+                getResources().getString(R.string.url),
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            myApplication myApp = (myApplication) getApplicationContext();
+                            UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
+                            myApp.setUserInfo(userInfo);
+                            showUserInfo();
+                        } else {
+                            CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
+                            String error = response.getString("error_msg");
+                            Snackbar.make(cl, error, Snackbar.LENGTH_SHORT).show();
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("INFO", "Fail " + error.getMessage())
+        );
+
+        if (infoRequest != null) {
+            MySingleton.getInstance(this).addToRequestQueue(infoRequest);
+        }
     }
 
     private void backToMainActivity() {

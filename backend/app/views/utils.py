@@ -52,8 +52,8 @@ def session_id_required(f):
 
 
 def get_static_path(type_):
-    base_path = os.path.dirname(__file__)
-    path = os.path.join('..', base_path, type_)
+    base_path = os.path.dirname(__file__)[:-5]
+    path = os.path.join(base_path, 'static', type_)
     if not os.path.exists(path):
         os.makedirs(path)
     return path
@@ -65,6 +65,11 @@ def generate_static_filename(name, type_):
     path = get_static_path(type_)
     filename = '{}.{}'.format(t, ext)
     return os.path.join(path, filename)
+
+
+def static_filename_2_url(filename, type_):
+    _, name = os.path.split(filename)
+    return '/static/{}/{}'.format(type_, name)
 
 
 def str_2_datetime(dt):

@@ -12,6 +12,8 @@ public class UserInfo {
     public String signature;
     public double score;
 
+    private static String url;
+
     public UserInfo(int id, String phone, String nickName,
                     String avatar, String signature, double score) {
         this.userId = id;
@@ -22,9 +24,13 @@ public class UserInfo {
         this.score = score;
     }
 
+    public static void setUrl(String u) {
+        url = u;
+    }
+
     public static UserInfo parseFromJSONResponse(JSONObject response) throws JSONException {
         String name = response.getString("nickname");
-        String avatar = response.getString("avatar");
+        String avatar = url + response.getString("avatar");
         String phone = response.getString("phone");
         int userId = response.getInt("user_id");
         String signature = response.getString("signature");
