@@ -55,6 +55,7 @@ def homepage():
             'target_location': o.target_location,
             'reward': o.reward,
             'customer_name': u.nickname,
+            'customer_id': u.id,
             'avatar': u.avatar
         })
     return success({

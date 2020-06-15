@@ -6,6 +6,7 @@ public class Order {
     private String type;
     private String detail;
     private String employer;
+    private int employer_id;
     private String startTime;
     private String endTime;
     private double reward;
@@ -13,7 +14,7 @@ public class Order {
     private String targetLocation;
 
     public Order(String title, int orderId, String type,
-                 String detail, String employer,
+                 String detail, String employer, int employer_id,
                  String start_time, String end_time,
                  String avatar, double reward, String target_location) {
         this.title = title;
@@ -21,6 +22,7 @@ public class Order {
         this.type = type;
         this.detail = detail;
         this.employer = employer;
+        this.employer_id = employer_id;
         this.startTime = start_time;
         this.endTime = end_time;
         this.avatar = avatar;
@@ -46,6 +48,10 @@ public class Order {
 
     public String getEmployer() {
         return employer;
+    }
+
+    public int getEmployerId() {
+        return employer_id;
     }
 
     public String getTime() {

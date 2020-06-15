@@ -22,6 +22,7 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
+import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     "类型" + String.valueOf(i % 4 + 1),
                     "订单详情" + String.valueOf(i + 1),
                     "发布者" + String.valueOf(i + 1),
+                    i,
                     "2020年7月" + String.valueOf(i) + "日",
                     "2020年8月" + String.valueOf(i) + "日",
                     defaultAvatar,
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new OrderAdapter(orderList);
+        adapter.setOnDetailClickListener(this::showOrderDetail);
         recyclerView.setAdapter(adapter);
         listener = new EndlessOnScrollListener(linearLayoutManager) {
             @Override
@@ -223,12 +226,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupAddActivityButton() {
         FloatingActionButton fab = findViewById(R.id.floating_action_button);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddActivity.class);
-                startActivityForResult(intent, ADD_ACTIVITY_REQUEST);
-            }
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            startActivityForResult(intent, ADD_ACTIVITY_REQUEST);
         });
     }
 
@@ -252,6 +252,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getUserInfo() {
+        if (!getUserInfoFromLocal()) {
+            getUserInfoFromRemote();
+        }
+    }
+
+    private boolean getUserInfoFromLocal() {
+        UserInfo userInfo = ((myApplication) getApplicationContext()).getUserInfo();
+        if (userInfo == null) {
+            return false;
+        }
+        setupDrawer(userInfo.nickName, userInfo.phone, userInfo.avatar);
+        return true;
+    }
+
+    private void getUserInfoFromRemote() {
         JSONObject jsonObject = new JSONObject();
 
         String url = MainActivity.this.getString(R.string.url) + "/user/info";
@@ -266,6 +281,12 @@ public class MainActivity extends AppCompatActivity {
                             String name = response.getString("nickname");
                             String avatar = response.getString("avatar");
                             String phone = response.getString("phone");
+                            int userId = response.getInt("user_id");
+                            String signature = response.getString("signature");
+                            double score = response.getDouble("score");
+                            myApplication myApp = (myApplication)getApplicationContext();
+                            myApp.setUserInfo(new UserInfo(userId, phone, name,
+                                    defaultAvatarIfNull(avatar), signature, score));
                             setupDrawer(name, phone, avatar);
                         } else {
                             CoordinatorLayout cl = findViewById(R.id.main_background);
@@ -306,6 +327,20 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyItemRangeChanged(oldSize, count);
     }
 
+    private void showOrderDetail(Order order) {
+        // TODO
+        UserInfo userInfo = ((myApplication) getApplicationContext()).getUserInfo();
+        int id = userInfo.userId;
+        Intent intent;
+        if (id == order.getEmployerId()) {
+            intent = new Intent(MainActivity.this, CustomerDetailActivity.class);
+        } else {
+            intent = new Intent(MainActivity.this, HandlerDetailActivity.class);
+        }
+        intent.putExtra("ORDER_ID", order.getOrderId());
+        startActivity(intent);
+    }
+
     private void requestOrderInPage(int page, SearchCondition sc, boolean refresh) {
         // TODO send request
         Map<String, String> map = new HashMap<>();
@@ -342,13 +377,14 @@ public class MainActivity extends AppCompatActivity {
                                 String detail = o.getString("description");
                                 String type = o.getString("genre");
                                 String employer = o.getString("customer_name");
+                                int employer_id = o.getInt("customer_id");
                                 String startTime = o.getString("start_time");
                                 String endTime = o.getString("end_time");
                                 String avatar = o.getString("avatar");
                                 avatar = defaultAvatarIfNull(avatar);
                                 double reward = o.getDouble("reward");
                                 String targetLocation = o.getString("target_location");
-                                orderList.add(new Order(title, id, type, detail, employer,
+                                orderList.add(new Order(title, id, type, detail, employer, employer_id,
                                         startTime, endTime, avatar, reward, targetLocation));
                             }
                             if (refresh) {
