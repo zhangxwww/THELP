@@ -15,6 +15,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
+import com.example.util.SHA;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
@@ -62,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/signup";
         Map<String, String> map = new HashMap<>();
         map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
-        map.put("password", sha(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
+        map.put("password", SHA.parse(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
 
 
         if (usernameEdit.getEditText().getText().length() != 11) {
@@ -123,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
         String postUrl = LoginActivity.this.getString(R.string.url) + "/user/login";
         Map<String, String> map = new HashMap<>();
         map.put("phone", Objects.requireNonNull(usernameEdit.getEditText()).getText().toString());
-        map.put("password", sha(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
+        map.put("password", SHA.parse(Objects.requireNonNull(passwordEdit.getEditText()).getText().toString()));
         if (usernameEdit.getEditText().getText().length() != 11) {
             usernameEdit.setError(getResources().getString(R.string.helper_text));
             return;
@@ -177,16 +178,5 @@ public class LoginActivity extends AppCompatActivity {
                 }
         );
         MySingleton.getInstance(this).addToRequestQueue(signinRequest);
-    }
-
-    private String sha(String s) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            md.update(s.getBytes());
-            return new BigInteger(md.digest()).toString(32);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return "";
-        }
     }
 }

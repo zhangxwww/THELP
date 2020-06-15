@@ -2,6 +2,7 @@ package com.example.thelp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -20,6 +21,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
     BottomSheetBehavior<RelativeLayout> behavior;
     String picUrl = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
     AvatarImageView aiv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +38,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 .into(aiv);
     }
 
-    void setBottomSheet(){
+    void setBottomSheet() {
         TextView detailsTv = findViewById(R.id.order_details_tv);
         ViewGroup.LayoutParams lp = detailsTv.getLayoutParams();
         detailsTv.setMovementMethod(ScrollingMovementMethod.getInstance());
@@ -63,7 +65,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
 //                        Log.d("getLineCount", "height:"+detailsTv.getLineCount() );
 //                        Log.d("getLineHeight", "height:"+detailsTv.getLineHeight() );
 
-                        lp.height = oldHeight+300;
+                        lp.height = oldHeight + 300;
                         detailsTv.setLayoutParams(lp);
 //                        int newH = detailsTv.getHeight();
 //                        Log.d("newHeight", "height:"+newH );
@@ -78,6 +80,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         break;
                 }
             }
+
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 //                Log.d("BottomSheetDemo", "slideOffset:" + slideOffset);

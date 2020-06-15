@@ -87,6 +87,29 @@ public class RequestFactory {
         );
     }
 
+    public static JsonObjectRequest getUserEditRequest(
+            HashMap<String, String> map, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        String json = new Gson().toJson(map);
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url = ip + "/user/edit";
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
     public static JsonObjectRequest getOrderDetailRequest(
             int orderId, String ip,
             Response.Listener<JSONObject> listener,

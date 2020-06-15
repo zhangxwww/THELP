@@ -10,6 +10,9 @@
     <string name="password_hint">密码</string>
     <string name="helper_text">手机号应为11位</string>
     <string name="password_helper_text">密码不超过20位</string>
+    <string name="name_too_long">用户名过长</string>
+    <string name="name_required">未输入用户名</string>
+    <string name="edit_succeed">修改成功</string>
     <string name="url">http://10.0.2.2:5000</string>
     <string name="home">主页</string>
     <string name="center">个人中心</string>
@@ -61,6 +64,8 @@
     <string name="tab_title">tabTitleAdapter</string>
     <string name="detail_long_placeholder">病情分析：       左下方胸部是不是胃的部位？有一点疼痛，不排除是胃的症状，可能平常饮食不注意，有胃炎的情况存在       指导意见：       笑得很厉害的时候有胸闷的情况问题不大，如果胸闷经常发生，而且伴随其他不适，需要完善肺功能等检查，排除是哮喘或者是支气管的症状</string>
     <string name="modify_hint">请输入修改后的内容</string>
+    <string name="modify_password_old_hint">请输入原密码</string>
+    <string name="modify_password_new_hint">请输入新密码</string>
     <string name="default_time">00:00</string>
     <string name="order_active_text">等待接单</string>
     <string name="order_accepted_text">已接单</string>

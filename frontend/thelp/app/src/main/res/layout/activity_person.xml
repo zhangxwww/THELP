@@ -2,14 +2,17 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/person_activity_bg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
     tools:context=".PersonActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <ImageButton
             android:id="@+id/button_back"
             android:layout_width="wrap_content"
@@ -17,131 +20,173 @@
             android:layout_marginStart="25dp"
             android:layout_marginTop="25dp"
             android:background="@color/colorBackground"
-            android:src="@drawable/ic_arrow_back_24px_black"
-            android:contentDescription="TODO" />
+            android:contentDescription="TODO"
+            android:src="@drawable/ic_arrow_back_24px_black" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical">
+
             <cn.carbs.android.avatarimageview.library.AvatarImageView
                 android:id="@+id/avatar"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:src="@drawable/salad"/>
+                android:src="@drawable/salad" />
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="25dp">
+                android:layout_marginTop="25dp"
+                android:orientation="horizontal">
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_centerInParent="true">
+                    android:layout_centerInParent="true"
+                    android:orientation="vertical">
+
                     <TextView
+                        android:id="@+id/person_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="温斯顿"
+                        android:textColor="@color/colorPrimaryVariant"
                         android:textSize="40sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorPrimaryVariant"/>
+                        android:textStyle="bold" />
+
                     <TextView
+                        android:id="@+id/person_score"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="评分3.5"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorPrimaryVariant"/>
+                        android:textColor="@color/colorPrimaryVariant"
+                        android:textSize="20sp" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginTop="10dp"
+                    android:layout_alignParentStart="true"
                     android:layout_marginStart="50dp"
-                    android:layout_alignParentStart="true">
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
                     <ImageButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@color/colorBackground"
-                        android:src="@drawable/ic_phone_24px_black"
-                        android:contentDescription="TODO" />
+                        android:contentDescription="TODO"
+                        android:src="@drawable/ic_phone_24px_black" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginTop="10dp"
                     android:layout_marginEnd="50dp"
-                    android:layout_alignParentEnd="true">
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
                     <ImageButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@color/colorBackground"
-                        android:src="@drawable/ic_textsms_24px_black"
-                        android:contentDescription="TODO" />
+                        android:contentDescription="TODO"
+                        android:src="@drawable/ic_textsms_24px_black" />
                 </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
             android:layout_marginStart="50dp"
+            android:layout_marginTop="50dp"
             android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorOnPrimary"
-                android:text="用户id"
-                android:textSize="18sp"/>
-            <TextView
-                android:id="@+id/id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:textColor="@color/colorOnPrimary"
-                android:text="winston0301"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="用户名"
                 android:textColor="@color/colorOnPrimary"
-                android:text="手机号"
-                android:layout_marginTop="20dp"
-                android:textSize="18sp"/>
+                android:textSize="18sp" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="30dp">
+
+                    <TextView
+                        android:id="@+id/name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="winston0301"
+                        android:textColor="@color/colorOnPrimary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/modify_name_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="修改"
+                        android:textColor="@color/colorAccentVariant"
+                        android:textSize="15sp" />
+                </RelativeLayout>
+            </LinearLayout>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="手机号"
+                android:textColor="@color/colorOnPrimary"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="30dp">
+
                     <TextView
                         android:id="@+id/phone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="17777777777"
                         android:textColor="@color/colorOnPrimary"
-                        android:textStyle="bold"
                         android:textSize="20sp"
-                        android:text="17777777777"/>
+                        android:textStyle="bold" />
+
                     <TextView
+                        android:id="@+id/modify_phone_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorAccentVariant"
-                        android:text="修改"
                         android:layout_alignParentEnd="true"
-                        android:id="@+id/modify_phone_button"
+                        android:text="修改"
+                        android:textColor="@color/colorAccentVariant"
                         android:textSize="15sp" />
                 </RelativeLayout>
             </LinearLayout>
@@ -150,70 +195,77 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorOnPrimary"
-                android:text="签名"
                 android:layout_marginTop="20dp"
-                android:textSize="18sp"/>
+                android:text="签名"
+                android:textColor="@color/colorOnPrimary"
+                android:textSize="18sp" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
+                android:orientation="horizontal">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="30dp">
+
                     <TextView
                         android:id="@+id/signature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorOnPrimary"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
                         android:layout_marginEnd="50dp"
-                        android:text="为荣耀而生，为荣耀而死！"/>
+                        android:text="为荣耀而生，为荣耀而死！"
+                        android:textColor="@color/colorOnPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
                     <TextView
+                        android:id="@+id/modify_signature_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorAccentVariant"
-                        android:text="修改"
                         android:layout_alignParentEnd="true"
-                        android:id="@+id/modify_signature_button"
+                        android:text="修改"
+                        android:textColor="@color/colorAccentVariant"
                         android:textSize="15sp" />
                 </RelativeLayout>
             </LinearLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorOnPrimary"
-                android:text="密码"
                 android:layout_marginTop="20dp"
-                android:textSize="18sp"/>
+                android:text="密码"
+                android:textColor="@color/colorOnPrimary"
+                android:textSize="18sp" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
+                android:orientation="horizontal">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="30dp">
+
                     <TextView
-                        android:id="@+id/signature2"
+                        android:id="@+id/password"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorOnPrimary"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
                         android:layout_marginEnd="50dp"
-                        android:text="********************"/>
+                        android:text="********************"
+                        android:textColor="@color/colorOnPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
                     <TextView
+                        android:id="@+id/modify_password_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorAccentVariant"
-                        android:text="修改"
                         android:layout_alignParentEnd="true"
-                        android:id="@+id/modify_password_button"
+                        android:text="修改"
+                        android:textColor="@color/colorAccentVariant"
                         android:textSize="15sp" />
                 </RelativeLayout>
             </LinearLayout>

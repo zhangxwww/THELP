@@ -79,6 +79,10 @@ def edit(u=None):
     if signature is not None:
         u.signature = signature
 
+    phone = request.json.get('phone')
+    if phone is not None:
+        u.phone = phone
+
     db.session.commit()
     return success()
 
