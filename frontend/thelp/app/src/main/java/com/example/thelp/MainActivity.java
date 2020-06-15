@@ -20,6 +20,7 @@ import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.data.Message;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
 import com.example.data.UserInfo;
@@ -217,6 +218,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         // do something with the clicked item :D
+                        int id = (int) drawerItem.getIdentifier();
+                        Intent intent = null;
+                        if (id == 2) {
+                            intent = new Intent(MainActivity.this, PersonActivity.class);
+                        } else if (id == 3) {
+                            intent = new Intent(MainActivity.this, HistoryActivity.class);
+                        } else if (id == 4) {
+                            intent = new Intent(MainActivity.this, MessageActivity.class);
+                        }
+                        if (intent != null) startActivity(intent);
                         return false;
                     }
                 })

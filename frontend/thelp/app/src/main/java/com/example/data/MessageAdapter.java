@@ -18,12 +18,13 @@ import com.google.android.material.button.MaterialButton;
 import java.util.List;
 
 import cn.carbs.android.avatarimageview.library.AvatarImageView;
+import cn.carbs.android.avatarimageview.library.SquareAvatarImageView;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
     private List<Message> messageList;
     private Activity curActivity;
     static class ViewHolder extends RecyclerView.ViewHolder {
-        AvatarImageView avatar;
+        SquareAvatarImageView avatar;
         TextView name;
         TextView time;
         TextView content;

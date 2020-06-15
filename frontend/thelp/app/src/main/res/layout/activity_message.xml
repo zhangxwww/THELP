@@ -25,15 +25,32 @@
                     android:id="@+id/app_bar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/gotham"
-                        android:text="@string/message"
-                        android:textColor="@android:color/black"
-                        android:textSize="20sp" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Button
+                            android:id="@+id/nav_back_button"
+                            style="@style/Widget.AppCompat.Button.Borderless"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:background="@android:color/transparent"
+                            android:backgroundTint="@android:color/transparent"
+                            android:backgroundTintMode="src_in"
+                            android:drawableLeft="@drawable/ic_arrow_back_24px_black" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/gotham"
+                            android:text="@string/message"
+                            android:textColor="@android:color/black"
+                            android:textSize="20sp" />
+                    </RelativeLayout>
+
                 </androidx.appcompat.widget.Toolbar>
             </LinearLayout>
         </com.google.android.material.appbar.AppBarLayout>
@@ -41,44 +58,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/message_unread"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="20dp"
-                android:textColor="@color/colorPrimaryVariant">
-            </TextView>
+            android:orientation="vertical"
+            android:background="@color/bg_content">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_unread"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="7dp"
-                android:background="@color/colorLightGrey">
-            </LinearLayout>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/message_read"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginStart="10dp"
-
-                android:layout_marginTop="20dp"
-                android:textColor="@color/colorPrimaryVariant">
-            </TextView>
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_read"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" />
-
         </LinearLayout>
     </LinearLayout>
 
