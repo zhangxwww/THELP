@@ -39,8 +39,9 @@ public class HistoryActivity extends AppCompatActivity {
         myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HistoryActivity.this, MainActivity.class);
-                startActivity(intent);
+                Intent intent = new Intent();
+                setResult(RESULT_OK, intent);
+                finish();
             }
         });
     }
