@@ -14,22 +14,22 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".FullImageActivity"></activity>
         <activity android:name=".ChatActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".HistoryActivity" />
         <activity android:name=".PersonActivity" />
-        <activity android:name=".AddActivity" />
-        <activity android:name=".CustomerDetailActivity" />
-        <activity android:name=".HandlerDetailActivity" />
+        <activity android:name=".AddActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".CustomerDetailActivity" >
+        </activity>
+        <activity android:name=".HandlerDetailActivity"> </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
-
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
