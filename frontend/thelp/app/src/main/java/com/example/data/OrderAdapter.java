@@ -13,9 +13,13 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
-public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
+public class OrderAdapter
+        extends RecyclerView.Adapter<OrderAdapter.ViewHolder>
+        implements View.OnClickListener {
+
     private List<Order> orderList;
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    private onDetailClickListener onDetailClickListener = null;
+    class ViewHolder extends RecyclerView.ViewHolder {
         ImageView orderImage;
         TextView orderTitle;
         TextView orderType;
@@ -33,6 +37,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             orderTime = view.findViewById(R.id.order_time);
             orderPublish = view.findViewById(R.id.order_publish);
             viewButton = view.findViewById(R.id.view_button);
+            viewButton.setOnClickListener(OrderAdapter.this);
         }
     }
 
@@ -55,10 +60,29 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.orderDetail.setText(order.getDetail());
         holder.orderPublish.setText(order.getEmployer());
         holder.orderTime.setText(order.getTime());
+        holder.viewButton.setTag(position);
     }
 
     @Override
     public int getItemCount() {
         return orderList.size();
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (onDetailClickListener != null) {
+            if (v.getId() == R.id.view_button) {
+                int position = (int) v.getTag();
+                onDetailClickListener.onDetailClick(orderList.get(position));
+            }
+        }
+    }
+
+    public interface onDetailClickListener {
+        void onDetailClick(Order order);
+    }
+
+    public void setOnDetailClickListener(onDetailClickListener listener) {
+        onDetailClickListener = listener;
     }
 }

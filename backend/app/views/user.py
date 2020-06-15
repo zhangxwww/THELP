@@ -107,6 +107,7 @@ def info():
     if u is None:
         return fail('User<id: {}> not exists'.format(user_id))
     return success({
+        'user_id': u.id,
         'nickname': u.nickname,
         'avatar': u.avatar,
         'signature': u.signature,
