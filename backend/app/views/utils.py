@@ -2,6 +2,9 @@ from flask import session
 
 from app.models import User
 from app.models import Order
+from app.models import Message
+
+from sqlalchemy import or_, and_
 
 import os
 import time
@@ -35,6 +38,44 @@ def check_order_relation(o, u, relation):
     if relation == 'customer' and o.customer_id != u.id or relation == 'handler' and o.handler_id != u.id:
         return None, permission_denied()
     return o, None
+
+
+def get_message_with(my_id, other_id, page, per_page):
+    condition1 = and_(Message.from_id == my_id, Message.to_id == other_id)
+    condition2 = and_(Message.from_id == other_id, Message.to_id == my_id)
+    query = Message.query.filter(or_(condition1, condition2))
+
+    pagination = query.order_by(Message.time.desc()).paginate(page, per_page=per_page, error_out=False)
+    messages = pagination.items
+    msg_list = []
+    unread_messages = []
+    for m in messages:
+        from_id = m.from_id
+        to_id = m.to_id
+
+        if to_id == my_id:
+            unread_messages.append(m)
+
+        from_user = User.query.filter(User.id == from_id).first()
+        to_user = User.query.filter(User.id == to_id).first()
+
+        msg_list.append({
+            'from': {
+                'id': from_id,
+                'name': from_user.nickname,
+                'avatar': from_user.avatar
+            },
+            'to': {
+                'id': to_id,
+                'name': to_user.nickname,
+                'avatar': to_user.avatar
+            },
+            'content': m.content,
+            'content_type': m.content_type,
+            'time': m.time,
+            'has_read': m.has_read
+        })
+    return msg_list, unread_messages
 
 
 def session_id_required(f):
@@ -98,6 +139,7 @@ def str_2_datetime(dt):
             return datetime.strptime(dt, form)
         except ValueError:
             return None
+
 
 def datetime_2_mdhm(dt):
     if dt is None:

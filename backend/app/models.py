@@ -44,3 +44,24 @@ class Order(db.Model):
 
     reward = db.Column(db.Float, default=0.0)
     assessment = db.Column(db.Float, default=5.0)
+
+
+class Message(db.Model):
+    __tablename__ = 'message'
+    message_id = db.Column(db.Integer, primary_key=True)
+
+    from_id = db.Column(db.Integer)
+    to_id = db.Column(db.Integer)
+
+    content_type = db.Column(db.String(5))
+    content = db.Column(db.Text)
+
+    time = db.Column(db.DateTime, default=datetime.now)
+    has_read = db.Column(db.Boolean, default=False)
+
+
+class ImageNameRelation(db.Model):
+    __tablename__ = 'image_name_relation'
+    relation_id = db.Column(db.Integer, primary_key=True)
+    generated_name = db.Column(db.String(256))
+    raw_name = db.Column(db.String(256))
