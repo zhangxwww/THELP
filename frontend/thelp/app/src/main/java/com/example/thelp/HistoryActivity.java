@@ -27,8 +27,8 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
         tabLayout = findViewById(R.id.tab_layout);
         viewPager = findViewById(R.id.view_pager);
-        fragments.add(OrderListFragment.newInstance(("骑手")));
-        fragments.add(OrderListFragment.newInstance("雇主"));
+        fragments.add(OrderListFragment.newInstance("骑手", this));
+        fragments.add(OrderListFragment.newInstance("雇主", this));
         titles.add("作为接单人");
         titles.add("作为发单人");
         viewPager.setAdapter(new HistoryPagerAdapter(getSupportFragmentManager(), fragments, titles));

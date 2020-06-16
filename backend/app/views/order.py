@@ -152,7 +152,7 @@ def accept(u=None):
     if o.state != 'active':
         return fail('Order<id: {}> is not active'.format(order_id))
     o.state = 'accepted'
-    o.handler = u.id
+    o.handler_id = u.id
     o.accept_time = datetime.now()
     db.session.commit()
     return success()
@@ -252,3 +252,78 @@ def detail():
             res['handler_id'] = o.handler_id
             res['handler'] = handler.nickname
     return success(res)
+
+
+@order.route('/history/handler', methods=['POST'])
+@session_id_required
+def history_handler(u=None):
+    query = Order.query.filter(Order.handler_id == u.id)
+    page = request.json.get('page', 1)
+    try:
+        page = int(page)
+    except ValueError:
+        return fail('Invalid page')
+    per_page = request.json.get('num_each_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        return fail('Invalid num each page')
+    pagination = query.order_by(Order.create_time.desc()).paginate(page, per_page=per_page, error_out=False)
+    orders = pagination.items
+    order_list = []
+    for o in orders:
+        cus = User.query.filter(o.customer_id == User.id).first()
+        order_list.append({
+            'order_id': o.order_id,
+            'title': o.title,
+            'description': o.description,
+            'genre': o.genre,
+            'state': o.state,
+            'start_time': o.start_time,
+            'end_time': o.end_time,
+            'target_location': o.target_location,
+            'reward': o.reward,
+            'customer_name': cus.nickname,
+            'customer_id': cus.id,
+            'avatar': cus.avatar
+        })
+    return success({
+        'order_list': order_list
+    })
+
+
+@order.route('/history/create', methods=['POST'])
+@session_id_required
+def history_create(u=None):
+    query = Order.query.filter(Order.customer_id == u.id)
+    page = request.json.get('page', 1)
+    try:
+        page = int(page)
+    except ValueError:
+        return fail('Invalid page')
+    per_page = request.json.get('num_each_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        return fail('Invalid num each page')
+    pagination = query.order_by(Order.create_time.desc()).paginate(page, per_page=per_page, error_out=False)
+    orders = pagination.items
+    order_list = []
+    for o in orders:
+        order_list.append({
+            'order_id': o.order_id,
+            'title': o.title,
+            'description': o.description,
+            'genre': o.genre,
+            'state': o.state,
+            'start_time': o.start_time,
+            'end_time': o.end_time,
+            'target_location': o.target_location,
+            'reward': o.reward,
+            'customer_name': u.nickname,
+            'customer_id': u.id,
+            'avatar': u.avatar
+        })
+    return success({
+        'order_list': order_list
+    })

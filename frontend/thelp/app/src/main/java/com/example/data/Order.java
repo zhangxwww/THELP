@@ -93,6 +93,11 @@ public class Order {
         DETAIL
     }
 
+    public enum HistoryType {
+        CREATE,
+        HANDLER
+    }
+
     public String getTitle() {
         return title;
     }
