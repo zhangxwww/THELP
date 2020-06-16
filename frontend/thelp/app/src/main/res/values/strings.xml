@@ -54,6 +54,10 @@
     <string name="start_required">请选择开始时间</string>
     <string name="end_required">请选择结束时间</string>
     <string name="accept_order_button_text">接单</string>
+    <string name="finish_order_button_text">完成</string>
+    <string name="abort_order_button_text">中止</string>
+    <string name="cancel_order_button_text">取消</string>
+    <string name="assess_order_button_text">评价</string>
     <string name="assess">订单完成！给您的接单人打个分吧！</string>
     <string name="message">消息</string>
     <string name="message_read">已读消息</string>
@@ -67,13 +71,15 @@
     <string name="modify_password_old_hint">请输入原密码</string>
     <string name="modify_password_new_hint">请输入新密码</string>
     <string name="default_time">00:00</string>
-    <string name="order_active_text">等待接单</string>
+    <string name="order_active_text">新建订单</string>
     <string name="order_accepted_text">已接单</string>
     <string name="order_finished_text">订单已完成</string>
+    <string name="order_assessed_text">订单已评价</string>
     <string name="order_canceled_text">订单已取消</string>
     <string name="order_active">active</string>
     <string name="order_accepted">accepted</string>
     <string name="order_finished">finished</string>
+    <string name="order_assessed">assessed</string>
     <string name="order_canceled">canceled</string>
     <string name="upload_succeed">上传成功</string>
     <string name="upload_failed">上传失败</string>

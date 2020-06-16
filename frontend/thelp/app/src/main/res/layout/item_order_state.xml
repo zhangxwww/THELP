@@ -17,25 +17,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:layout_gravity="center_vertical"
             android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/iv_upper_line"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="25dp"
+                android:layout_height="17dp"
                 android:visibility="visible"
                 app:srcCompat="@drawable/order_status_line" />
 
             <ImageView
                 android:id="@+id/iv_circle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_gravity="center_vertical"
                 android:background="@drawable/ic_remove_circle_outline_black_24dp" />
 
             <ImageView
                 android:id="@+id/iv_lower_line"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="25dp"
+                android:layout_height="17dp"
                 android:visibility="visible"
                 app:srcCompat="@drawable/order_status_line" />
         </LinearLayout>
@@ -45,7 +47,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
-            android:gravity="center"
+            android:gravity="center_vertical|left"
+            android:layout_gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView
@@ -55,34 +58,14 @@
                 android:gravity="center_vertical"
                 android:text="有人接单"
                 android:layout_gravity="left"
-                android:textSize="18sp" />
-
-            <LinearLayout
-                android:id="@+id/ly_orderstatus_time"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/tv_orderstatus_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical|top"
-                android:weightSum="8"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imageview"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:layout_marginRight="5dp"
-                    app:srcCompat="@drawable/ic_restore_black_24dp" />
-
-                <TextView
-                    android:id="@+id/tv_orderstatus_time"
-                    android:layout_width="0dp"
-                    android:layout_weight="7"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:text="8:30am,Jan 31,2018"
-                    android:textSize="18sp" />
-            </LinearLayout>
+                android:layout_gravity="left"
+                android:text="8:30am,Jan 31,2018"
+                android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
 

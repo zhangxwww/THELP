@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     private SearchCondition searchCondition = null;
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
+    public static final String ORDER_STATE = "ORDER_STATE";
+    public static final int ORDER_NOT_ACCEPTED = 0;
+    public static final int ORDER_ACCEPTED = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -331,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(MainActivity.this, HandlerDetailActivity.class);
         }
         intent.putExtra("ORDER_ID", order.getOrderId());
+        intent.putExtra(ORDER_STATE, ORDER_NOT_ACCEPTED);
         startActivity(intent);
     }
 

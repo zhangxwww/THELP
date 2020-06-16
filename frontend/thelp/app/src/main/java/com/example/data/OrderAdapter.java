@@ -59,7 +59,7 @@ public class OrderAdapter
         holder.orderType.setText(order.getType());
         holder.orderDetail.setText(order.getDetail());
         holder.orderPublish.setText(order.getEmployer());
-        holder.orderTime.setText(order.getTime());
+        holder.orderTime.setText(order.getStartTime());
         holder.viewButton.setTag(position);
     }
 
