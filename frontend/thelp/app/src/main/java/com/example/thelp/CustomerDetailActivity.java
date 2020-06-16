@@ -65,11 +65,11 @@ public class CustomerDetailActivity extends AppCompatActivity {
         handlerLayout = this.findViewById(R.id.order_handler_layout);
         bottomSheet = findViewById(R.id.bottom_sheet);
 
-//        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
-//        orderStatusList(orderId);
+        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
+        orderStatusList(orderId);
 
-        orderId = 0;
-        initOrderStatusList();
+        // orderId = 0;
+        // initOrderStatusList();
         aiv = (AvatarImageView) this.findViewById(R.id.order_avatar_image);
         Glide
                 .with(this)
@@ -296,34 +296,6 @@ public class CustomerDetailActivity extends AppCompatActivity {
     private List<OrderStatusModel> getDetailFromOrderDetail(Order order) {
         List<OrderStatusModel> status = new ArrayList<>();
         Resources res = CustomerDetailActivity.this.getResources();
-//        if (order.state.equals(res.getString(R.string.order_canceled))) {
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_canceled_text),
-//                    "", true)
-//            );
-//        } else {
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_active_text),
-//                    "", false));
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_accepted_text),
-//                    "", false));
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_finished_text),
-//                    "", false));
-//            if (order.state.equals(res.getString(R.string.order_active))) {
-//                status.get(0).orderStateTime = order.createTime;
-//                status.get(0).isAchieved = true;
-//            }
-//            if (order.state.equals(res.getString(R.string.order_accepted))) {
-//                status.get(1).orderStateTime = order.acceptTime;
-//                status.get(1).isAchieved = true;
-//            }
-//            if (order.state.equals(res.getString(R.string.order_finished))) {
-//                status.get(2).orderStateTime = order.finishTime;
-//                status.get(2).isAchieved = true;
-//            }
-//        }
         String stat = order.state;
         if (stat.equals(res.getString(R.string.order_canceled))) {
             status.add(new OrderStatusModel(

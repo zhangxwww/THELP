@@ -87,9 +87,9 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 getOrderInfo(orderId))
                 .start();
         int orderState = Objects.requireNonNull(
-                getIntent().getExtras()).getInt(MainActivity.ORDER_STATE);
+                getIntent().getExtras()).getInt(Order.ORDER_STATE);
 
-        if (orderState == MainActivity.ORDER_ACCEPTED) {
+        if (orderState == Order.ORDER_ACCEPTED) {
             finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
             acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
         }
@@ -180,7 +180,8 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         try {
                             boolean success = response.getBoolean("success");
                             if (success) {
-                                acceptButton.setText(R.string.order_accepted_text);
+                                finishButton.setVisibility(View.VISIBLE);
+                                acceptButton.setVisibility(View.GONE);
                                 Snackbar.make(bottomSheet, "接单成功", Snackbar.LENGTH_SHORT).show();
                             } else {
                                 String error = response.getString("error_msg");

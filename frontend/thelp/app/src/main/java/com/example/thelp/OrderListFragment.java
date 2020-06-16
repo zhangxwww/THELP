@@ -1,6 +1,7 @@
 package com.example.thelp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
+import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
 import com.google.android.material.snackbar.Snackbar;
@@ -40,6 +42,7 @@ public class OrderListFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
+    private static final String ORDER_STATE = "ORDER_STATE";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -78,29 +81,12 @@ public class OrderListFragment extends Fragment {
         defaultAvatar = "https://overwatch.nosdn.127.net/2/heroes/Sigma/hero-select-portrait.png";
     }
 
-    // TODO: acquire order list here
-    // param suggests whether it's customer or rider order
-    private void setupOrderList(String param) {
-        for (int i = 0; i < 10; i++) {
-            orderList.add(new Order(param + "订单" + String.valueOf(i), i,
-                    "类型" + String.valueOf(i % 4 + 1),
-                    "订单详情" + String.valueOf(i + 1),
-                    "发布者" + String.valueOf(i + 1),
-                    i,
-                    "2020年7月" + String.valueOf(i) + "日",
-                    "2020年8月" + String.valueOf(i) + "日",
-                    defaultAvatar,
-                    10,
-                    "目的地" + String.valueOf(i)));
-        }
-    }
-
     private void setupRecycler(View view) {
-        // setupOrderList(this.mParam1);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new OrderAdapter(orderList);
+        adapter.setOnDetailClickListener(this::showOrderDetail);
         recyclerView.setAdapter(adapter);
         listener = new EndlessOnScrollListener(linearLayoutManager) {
             @Override
@@ -109,6 +95,20 @@ public class OrderListFragment extends Fragment {
             }
         };
         recyclerView.addOnScrollListener(listener);
+    }
+
+    private void showOrderDetail(Order order) {
+        UserInfo userInfo = ((myApplication) ctx.getApplicationContext()).getUserInfo();
+        int id = userInfo.userId;
+        Intent intent;
+        if (id == order.getEmployerId()) {
+            intent = new Intent(ctx, CustomerDetailActivity.class);
+        } else {
+            intent = new Intent(ctx, HandlerDetailActivity.class);
+        }
+        intent.putExtra("ORDER_ID", order.getOrderId());
+        intent.putExtra(ORDER_STATE, Order.ORDER_ACCEPTED);
+        startActivity(intent);
     }
 
     private void setupRefreshLayout(View view) {
