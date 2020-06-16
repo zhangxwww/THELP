@@ -198,9 +198,9 @@
                     android:id="@+id/button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
                     android:backgroundTint="@color/colorAccent"
-                    android:text="@string/accept_order_button_text" />
+                    android:text="@string/accept_order_button_text"
+                    android:textSize="18sp" />
 
             </LinearLayout>
 

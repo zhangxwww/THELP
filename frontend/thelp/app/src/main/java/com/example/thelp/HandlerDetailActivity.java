@@ -8,12 +8,27 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
+import com.example.data.Order;
+import com.example.data.UserInfo;
+import com.example.request.MySingleton;
+import com.example.request.RequestFactory;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
+import org.json.JSONException;
+import org.w3c.dom.Text;
+
+import java.util.List;
+import java.util.Objects;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cn.carbs.android.avatarimageview.library.AvatarImageView;
 
 public class HandlerDetailActivity extends AppCompatActivity {
@@ -22,10 +37,35 @@ public class HandlerDetailActivity extends AppCompatActivity {
     String picUrl = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
     AvatarImageView aiv;
 
+    @BindView(R.id.order_title_tv)
+    TextView orderTitleView;
+
+    @BindView(R.id.order_location_tv)
+    TextView orderLocationView;
+
+    @BindView(R.id.order_time_tv)
+    TextView orderTimeView;
+
+    @BindView(R.id.order_reward_tv)
+    TextView orderRewardView;
+
+    @BindView(R.id.order_details_tv)
+    TextView orderDetailView;
+
+    @BindView(R.id.order_name_tv)
+    TextView orderNameView;
+
+    @BindView(R.id.order_ctime_tv)
+    TextView orderCreateTimeView;
+
+    @BindView(R.id.button)
+    Button acceptButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_handler_detail);
+        ButterKnife.bind(this);
         //底部抽屉栏展示地址
         bottomSheet = findViewById(R.id.bottom_sheet);
         behavior = BottomSheetBehavior.from(bottomSheet);
@@ -36,6 +76,81 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 .load(picUrl)
                 .centerCrop()
                 .into(aiv);
+
+        new Thread(() ->
+                getOrderInfo(Objects.requireNonNull(
+                        getIntent().getExtras()).getInt("ORDER_ID")))
+                .start();
+    }
+
+    private void showOrderInfo(Order order) {
+        orderTitleView.post(() -> orderTitleView.setText(order.title));
+        orderLocationView.post(() -> orderLocationView.setText(order.targetLocation));
+        orderTimeView.post(() -> orderTimeView.setText(order.startTime));
+        orderRewardView.post(() -> orderRewardView.setText(String.valueOf(order.reward)));
+        orderDetailView.post(() -> orderDetailView.setText(order.detail));
+        orderNameView.post(() -> orderNameView.setText(order.employer));
+        new Thread(() -> getCustomerInfo(order.employer_id)).start();
+        orderCreateTimeView.post(() -> orderCreateTimeView.setText(order.createTime));
+    }
+
+    private void showCustomerInfo(UserInfo userInfo) {
+        Glide
+                .with(this)
+                .load(userInfo.avatar)
+                .centerCrop()
+                .into(aiv);
+    }
+
+    private void getCustomerInfo(int customerId) {
+        JsonObjectRequest req = RequestFactory.getUserInfoRequest(
+                customerId,
+                getResources().getString(R.string.url),
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
+                            showCustomerInfo(userInfo);
+                        } else {
+                            String error = response.getString("error_msg");
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("HandlerDetailUserInfo", "Fail " + error.getMessage())
+        );
+        if (req != null) {
+            MySingleton.getInstance(this).addToRequestQueue(req);
+        }
+    }
+
+    private void getOrderInfo(int orderId) {
+        JsonObjectRequest req = RequestFactory.getOrderDetailRequest(
+                orderId,
+                getResources().getString(R.string.url),
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            Order order = Order.parseFromJSONResponse(response, orderId);
+                            showOrderInfo(order);
+                            //getHandlerInfo(order);
+                        } else {
+                            String error = response.getString("error_msg");
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
+        );
+        if (req != null) {
+            MySingleton.getInstance(this).addToRequestQueue(req);
+        }
     }
 
     void setBottomSheet() {

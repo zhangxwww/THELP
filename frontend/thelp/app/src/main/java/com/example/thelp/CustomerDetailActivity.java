@@ -1,9 +1,6 @@
 package com.example.thelp;
 
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -17,28 +14,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.baidu.mapapi.CoordType;
-import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapView;
 import com.bumptech.glide.Glide;
 import com.example.data.Order;
 import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
-import com.google.gson.Gson;
-import com.stepstone.stepper.StepperLayout;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import cn.carbs.android.avatarimageview.library.AvatarImageView;

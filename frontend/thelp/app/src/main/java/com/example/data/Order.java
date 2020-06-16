@@ -1,7 +1,5 @@
 package com.example.data;
 
-import com.example.thelp.CustomerDetailActivity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
