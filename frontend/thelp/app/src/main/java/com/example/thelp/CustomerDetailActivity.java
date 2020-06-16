@@ -57,6 +57,10 @@ public class CustomerDetailActivity extends AppCompatActivity {
     @BindView(R.id.button_assess)
     Button assessButton;
 
+    private static final int ASSESS_CODE = 0;
+
+    private Order order;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,11 +69,11 @@ public class CustomerDetailActivity extends AppCompatActivity {
         handlerLayout = this.findViewById(R.id.order_handler_layout);
         bottomSheet = findViewById(R.id.bottom_sheet);
 
-        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
-        orderStatusList(orderId);
+//        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
+//        orderStatusList(orderId);
 
-//        orderId = 0;
-//        initOrderStatusList();
+        orderId = 0;
+        initOrderStatusList();
         aiv = (AvatarImageView) this.findViewById(R.id.order_avatar_image);
         Glide
                 .with(this)
@@ -135,7 +139,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
                     try {
                         boolean success = response.getBoolean("success");
                         if (success) {
-                            Order order = Order.parseFromJSONResponse(response, orderId);
+                            order = Order.parseFromJSONResponse(response, orderId);
                             arrayOfStatus = getDetailFromOrderDetail(order);
                             OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
                             ListView listView = findViewById(R.id.state_list);
@@ -296,34 +300,6 @@ public class CustomerDetailActivity extends AppCompatActivity {
     private List<OrderStatusModel> getDetailFromOrderDetail(Order order) {
         List<OrderStatusModel> status = new ArrayList<>();
         Resources res = CustomerDetailActivity.this.getResources();
-//        if (order.state.equals(res.getString(R.string.order_canceled))) {
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_canceled_text),
-//                    "", true)
-//            );
-//        } else {
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_active_text),
-//                    "", false));
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_accepted_text),
-//                    "", false));
-//            status.add(new OrderStatusModel(
-//                    res.getString(R.string.order_finished_text),
-//                    "", false));
-//            if (order.state.equals(res.getString(R.string.order_active))) {
-//                status.get(0).orderStateTime = order.createTime;
-//                status.get(0).isAchieved = true;
-//            }
-//            if (order.state.equals(res.getString(R.string.order_accepted))) {
-//                status.get(1).orderStateTime = order.acceptTime;
-//                status.get(1).isAchieved = true;
-//            }
-//            if (order.state.equals(res.getString(R.string.order_finished))) {
-//                status.get(2).orderStateTime = order.finishTime;
-//                status.get(2).isAchieved = true;
-//            }
-//        }
         String stat = order.state;
         if (stat.equals(res.getString(R.string.order_canceled))) {
             status.add(new OrderStatusModel(
@@ -368,33 +344,87 @@ public class CustomerDetailActivity extends AppCompatActivity {
         assessButton.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerDetailActivity.this, AssessActivity.class);
             intent.putExtra("ORDER_ID", orderId);
-            startActivity(intent);
+            intent.putExtra("HANDLER_ID", order.employee_id);
+            startActivityForResult(intent, ASSESS_CODE);
         });
 
         cancelButton.setOnClickListener(v -> {
             //仿个人页的修改按钮，需要弹出框框确认中止
             //成功取消的话还需要做:
-            cancelButton.setVisibility(GONE);
-            arrayOfStatus.clear();
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_canceled_text),
-                    "", true)
+
+            JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                    orderId, Order.OperationType.CANCEL, res.getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                cancelButton.setVisibility(GONE);
+                                arrayOfStatus.clear();
+                                arrayOfStatus.add(new OrderStatusModel(
+                                        res.getString(R.string.order_canceled_text),
+                                        "", true)
+                                );
+                                OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
+                                ListView listView = findViewById(R.id.state_list);
+                                listView.setAdapter(adapter);
+                            } else {
+                                String error = response.getString("error_msg");
+                                Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
             );
-            OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
-            ListView listView = findViewById(R.id.state_list);
-            listView.setAdapter(adapter);
+            if (req != null) {
+                MySingleton.getInstance(this).addToRequestQueue(req);
+            }
         });
 
         abortButton.setOnClickListener(v -> {
             //仿个人页的修改按钮，需要弹出框框确认中止
             //成功中止的话还需要做:
-            abortButton.setVisibility(GONE);
-            cancelButton.setVisibility(View.VISIBLE);
-            handlerLayout.setVisibility(View.GONE);
-            arrayOfStatus.get(1).isAchieved = false;
-            OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
-            ListView listView = findViewById(R.id.state_list);
-            listView.setAdapter(adapter);
+
+            JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                    orderId, Order.OperationType.ABORT, res.getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                abortButton.setVisibility(GONE);
+                                cancelButton.setVisibility(View.VISIBLE);
+                                handlerLayout.setVisibility(View.GONE);
+                                arrayOfStatus.get(1).isAchieved = false;
+                                OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
+                                ListView listView = findViewById(R.id.state_list);
+                                listView.setAdapter(adapter);
+                            } else {
+                                String error = response.getString("error_msg");
+                                Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
+            );
+            if (req != null) {
+                MySingleton.getInstance(this).addToRequestQueue(req);
+            }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ASSESS_CODE) {
+            if (resultCode == RESULT_OK) {
+                assessButton.setVisibility(GONE);
+                Snackbar.make(bottomSheet, "评分成功", Snackbar.LENGTH_SHORT).show();
+            }
+        }
     }
 }

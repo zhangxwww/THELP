@@ -93,6 +93,15 @@ public class Order {
         DETAIL
     }
 
+    public enum HistoryType {
+        CREATE,
+        HANDLER
+    }
+
+    public static final String ORDER_STATE = "ORDER_STATE";
+    public static final int ORDER_NOT_ACCEPTED = 0;
+    public static final int ORDER_ACCEPTED = 1;
+
     public String getTitle() {
         return title;
     }

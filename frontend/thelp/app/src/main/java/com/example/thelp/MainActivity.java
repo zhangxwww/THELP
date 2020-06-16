@@ -62,9 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private SearchCondition searchCondition = null;
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
-    public static final String ORDER_STATE = "ORDER_STATE";
-    public static final int ORDER_NOT_ACCEPTED = 0;
-    public static final int ORDER_ACCEPTED = 1;
+    private static final int CUSTOMER_DETAIL_REQUEST = 123;
 
 
     @Override
@@ -246,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ADD_ACTIVITY_REQUEST) {
+        if (requestCode == ADD_ACTIVITY_REQUEST || requestCode == CUSTOMER_DETAIL_REQUEST) {
             if (resultCode == RESULT_OK) {
                 updateActivityList();
             }
@@ -325,7 +323,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showOrderDetail(Order order) {
-        // TODO
         UserInfo userInfo = ((myApplication) getApplicationContext()).getUserInfo();
         int id = userInfo.userId;
         Intent intent;
@@ -335,8 +332,12 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(MainActivity.this, HandlerDetailActivity.class);
         }
         intent.putExtra("ORDER_ID", order.getOrderId());
-        intent.putExtra(ORDER_STATE, ORDER_NOT_ACCEPTED);
-        startActivity(intent);
+        intent.putExtra(Order.ORDER_STATE, Order.ORDER_NOT_ACCEPTED);
+        if (id == order.employer_id) {
+            startActivityForResult(intent, CUSTOMER_DETAIL_REQUEST);
+        } else {
+            startActivity(intent);
+        }
     }
 
     private void requestOrderInPage(int page, SearchCondition sc, boolean refresh) {

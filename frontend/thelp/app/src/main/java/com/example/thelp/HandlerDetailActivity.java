@@ -65,8 +65,6 @@ public class HandlerDetailActivity extends AppCompatActivity {
     @BindView(R.id.button_finish)
     Button finishButton;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,11 +87,10 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 getOrderInfo(orderId))
                 .start();
         int orderState = Objects.requireNonNull(
-                getIntent().getExtras()).getInt(MainActivity.ORDER_STATE);
+                getIntent().getExtras()).getInt(Order.ORDER_STATE);
 
-        if (orderState == MainActivity.ORDER_ACCEPTED) {
-            finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
-            acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
+        if (orderState == Order.ORDER_ACCEPTED) {
+            // 写在了showOrderInfo中
         }
         bindButtonEvent(orderId);
     }
@@ -107,9 +104,20 @@ public class HandlerDetailActivity extends AppCompatActivity {
         orderNameView.post(() -> orderNameView.setText(order.employer));
         orderCreateTimeView.post(() -> orderCreateTimeView.setText(order.createTime));
         int myUserId = ((myApplication) getApplicationContext()).getUserInfo().userId;
-        if (order.state.equals(getResources().getString(R.string.order_accepted))
-                && order.employee_id == myUserId) {
-            acceptButton.post(() -> acceptButton.setText(R.string.order_accepted_text));
+        if (order.employee_id == myUserId) {
+            if (order.state.equals(getResources().getString(R.string.order_accepted))) {
+                acceptButton.post(() -> {
+                    acceptButton.setText(R.string.order_accepted_text);
+                    acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
+                    finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
+                });
+            } else if (order.state.equals(getResources().getString(R.string.order_finished))) {
+                finishButton.post(() -> finishButton.setVisibility(View.GONE));
+            } else {
+                // acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
+            }
+        } else {
+            acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
         }
     }
 
@@ -182,8 +190,35 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         try {
                             boolean success = response.getBoolean("success");
                             if (success) {
-                                acceptButton.setText(R.string.order_accepted_text);
+                                finishButton.setVisibility(View.VISIBLE);
+                                acceptButton.setVisibility(View.GONE);
                                 Snackbar.make(bottomSheet, "接单成功", Snackbar.LENGTH_SHORT).show();
+                            } else {
+                                String error = response.getString("error_msg");
+                                Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
+            );
+            if (req != null) {
+                MySingleton.getInstance(this).addToRequestQueue(req);
+            }
+        });
+        finishButton.setOnClickListener(v -> {
+            Order.OperationType type = Order.OperationType.FINISH;
+            JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                    orderId, type, getResources().getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                finishButton.setVisibility(View.GONE);
+                                acceptButton.setVisibility(View.GONE);
+                                Snackbar.make(bottomSheet, "成功完成", Snackbar.LENGTH_SHORT).show();
                             } else {
                                 String error = response.getString("error_msg");
                                 Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();

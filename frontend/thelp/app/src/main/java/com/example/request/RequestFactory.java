@@ -160,6 +160,70 @@ public class RequestFactory {
         );
     }
 
+    public static JsonObjectRequest getOrderHistoryRequest(
+            int page, Order.HistoryType type, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("page", String.valueOf(page));
+        map.put("num_each_page", "10");
+        String json = new Gson().toJson(map);
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url;
+        switch (type) {
+            case CREATE:
+                url = ip + "/order/history/create";
+                break;
+            case HANDLER:
+                url = ip + "/order/history/handler";
+                break;
+            default:
+                return null;
+        }
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
+    public static JsonObjectRequest getOrderAssessRequest(
+            int orderId, int assess, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("order_id", String.valueOf(orderId));
+        map.put("assess", String.valueOf(assess));
+        String json = new Gson().toJson(map);
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url = ip + "/order/assess";
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
     public static void uploadFile(File file, String ip, Callback callback) {
         OkHttpClient client = new OkHttpClient();
         MediaType contentType = MediaType.parse("text/plain");
