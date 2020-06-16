@@ -20,6 +20,7 @@ import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
 import org.w3c.dom.Text;
@@ -60,7 +61,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.button)
     Button acceptButton;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,10 +78,12 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(aiv);
 
+        int orderId = Objects.requireNonNull(
+                getIntent().getExtras()).getInt("ORDER_ID");
         new Thread(() ->
-                getOrderInfo(Objects.requireNonNull(
-                        getIntent().getExtras()).getInt("ORDER_ID")))
+                getOrderInfo(orderId))
                 .start();
+        bindButtonEvent(orderId);
     }
 
     private void showOrderInfo(Order order) {
@@ -90,8 +93,12 @@ public class HandlerDetailActivity extends AppCompatActivity {
         orderRewardView.post(() -> orderRewardView.setText(String.valueOf(order.reward)));
         orderDetailView.post(() -> orderDetailView.setText(order.detail));
         orderNameView.post(() -> orderNameView.setText(order.employer));
-        new Thread(() -> getCustomerInfo(order.employer_id)).start();
         orderCreateTimeView.post(() -> orderCreateTimeView.setText(order.createTime));
+        int myUserId = ((myApplication) getApplicationContext()).getUserInfo().userId;
+        if (order.state.equals(getResources().getString(R.string.order_accepted))
+                && order.employee_id == myUserId) {
+            acceptButton.post(() -> acceptButton.setText(R.string.order_accepted_text));
+        }
     }
 
     private void showCustomerInfo(UserInfo userInfo) {
@@ -128,8 +135,9 @@ public class HandlerDetailActivity extends AppCompatActivity {
     }
 
     private void getOrderInfo(int orderId) {
-        JsonObjectRequest req = RequestFactory.getOrderDetailRequest(
+        JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
                 orderId,
+                Order.OperationType.DETAIL,
                 getResources().getString(R.string.url),
                 response -> {
                     try {
@@ -137,7 +145,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         if (success) {
                             Order order = Order.parseFromJSONResponse(response, orderId);
                             showOrderInfo(order);
-                            //getHandlerInfo(order);
+                            getCustomerInfo(order.employer_id);
                         } else {
                             String error = response.getString("error_msg");
                             Log.d("Error Msg", error);
@@ -151,6 +159,34 @@ public class HandlerDetailActivity extends AppCompatActivity {
         if (req != null) {
             MySingleton.getInstance(this).addToRequestQueue(req);
         }
+    }
+
+    private void bindButtonEvent(int orderId) {
+        acceptButton.setOnClickListener(v -> {
+            Order.OperationType type = Order.OperationType.ACCEPT;
+            JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                    orderId, type, getResources().getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                acceptButton.setText(R.string.order_accepted_text);
+                                Snackbar.make(bottomSheet, "接单成功", Snackbar.LENGTH_SHORT).show();
+                            } else {
+                                String error = response.getString("error_msg");
+                                Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
+            );
+            if (req != null) {
+                MySingleton.getInstance(this).addToRequestQueue(req);
+            }
+        });
     }
 
     void setBottomSheet() {

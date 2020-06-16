@@ -8,10 +8,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
-import com.example.thelp.CustomerDetailActivity;
-import com.example.thelp.MainActivity;
-import com.example.thelp.R;
+import com.example.data.Order;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -20,7 +17,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -119,8 +115,8 @@ public class RequestFactory {
         );
     }
 
-    public static JsonObjectRequest getOrderDetailRequest(
-            int orderId, String ip,
+    public static JsonObjectRequest getOrderOperationRequest(
+            int orderId, Order.OperationType type, String ip,
             Response.Listener<JSONObject> listener,
             Response.ErrorListener errorListener) {
 
@@ -135,8 +131,26 @@ public class RequestFactory {
             e.printStackTrace();
             return null;
         }
-
-        String url = ip + "/order/detail";
+        String url;
+        switch (type) {
+            case DETAIL:
+                url = ip + "/order/detail";
+                break;
+            case ACCEPT:
+                url = ip + "/order/accept";
+                break;
+            case CANCEL:
+                url = ip + "/order/cancel";
+                break;
+            case ABORT:
+                url = ip + "/order/abort";
+                break;
+            case FINISH:
+                url = ip + "/order/finish";
+                break;
+            default:
+                return null;
+        }
         return getRequest(
                 Request.Method.POST,
                 url,

@@ -53,8 +53,9 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
     private void orderStatusList(int orderId) {
 
-        JsonObjectRequest req = RequestFactory.getOrderDetailRequest(
+        JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
                 orderId,
+                Order.OperationType.DETAIL,
                 CustomerDetailActivity.this.getResources().getString(R.string.url),
                 response -> {
                     try {

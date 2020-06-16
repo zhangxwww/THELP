@@ -6,6 +6,8 @@ from app import db
 from app.models import User
 from app.models import Order
 
+from datetime import datetime
+
 from .utils import session_id_required, get_order, check_order_relation, str_2_datetime
 from .return_value import success, field_required, permission_denied, fail
 
@@ -151,6 +153,7 @@ def accept(u=None):
         return fail('Order<id: {}> is not active'.format(order_id))
     o.state = 'accepted'
     o.handler = u.id
+    o.accept_time = datetime.now()
     db.session.commit()
     return success()
 
@@ -167,6 +170,7 @@ def finish(u=None):
     if o.state != 'accepted':
         return fail('Order<id: {}> is not accepted'.format(order_id))
     o.state = 'finished'
+    o.finish_time = datetime.now()
     db.session.commit()
     return success()
 

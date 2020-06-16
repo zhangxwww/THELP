@@ -85,6 +85,14 @@ public class Order {
         return order;
     }
 
+    public enum OperationType {
+        ACCEPT,
+        CANCEL,
+        ABORT,
+        FINISH,
+        DETAIL
+    }
+
     public String getTitle() {
         return title;
     }
