@@ -26,7 +26,7 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/frame"
         app:behavior_hideable="false"
-        app:behavior_peekHeight="300dp"
+        app:behavior_peekHeight="350dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <LinearLayout

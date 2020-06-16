@@ -98,3 +98,9 @@ def str_2_datetime(dt):
             return datetime.strptime(dt, form)
         except ValueError:
             return None
+
+def datetime_2_mdhm(dt):
+    if dt is None:
+        return None
+    mdhmStr = dt.strftime('%m-%d %H:%M')
+    return mdhmStr

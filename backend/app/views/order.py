@@ -8,7 +8,7 @@ from app.models import Order
 
 from datetime import datetime
 
-from .utils import session_id_required, get_order, check_order_relation, str_2_datetime
+from .utils import session_id_required, get_order, check_order_relation, str_2_datetime, datetime_2_mdhm
 from .return_value import success, field_required, permission_denied, fail
 
 order = Blueprint('order', __name__)
@@ -236,11 +236,11 @@ def detail():
         'description': o.description,
         'genre': o.genre,
         'state': o.state,
-        'start_time': o.start_time,
-        'end_time': o.end_time,
-        'create_time': o.create_time,
-        'accept_time': o.accept_time,
-        'finish_time': o.finish_time,
+        'start_time': datetime_2_mdhm(o.start_time),
+        'end_time': datetime_2_mdhm(o.end_time),
+        'create_time': datetime_2_mdhm(o.create_time),
+        'accept_time': datetime_2_mdhm(o.accept_time),
+        'finish_time': datetime_2_mdhm(o.finish_time),
         'target_location': o.target_location,
         'handler_location': o.handler_location,
         'reward': o.reward,

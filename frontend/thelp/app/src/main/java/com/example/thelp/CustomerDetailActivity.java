@@ -65,11 +65,11 @@ public class CustomerDetailActivity extends AppCompatActivity {
         handlerLayout = this.findViewById(R.id.order_handler_layout);
         bottomSheet = findViewById(R.id.bottom_sheet);
 
-//        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
-//        orderStatusList(orderId);
+        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
+        orderStatusList(orderId);
 
-        orderId = 0;
-        initOrderStatusList();
+//        orderId = 0;
+//        initOrderStatusList();
         aiv = (AvatarImageView) this.findViewById(R.id.order_avatar_image);
         Glide
                 .with(this)

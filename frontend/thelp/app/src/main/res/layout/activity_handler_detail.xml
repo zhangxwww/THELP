@@ -96,8 +96,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="清华大学文北楼"
+                        android:textColor="@color/colorOnPrimary"
+                        android:layout_alignParentStart="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="截至"
+                        android:layout_toLeftOf="@id/order_time_tv"
+                        android:layout_marginRight="3dp"
                         android:textColor="@color/colorOnPrimary" />
-
                     <TextView
                         android:id="@+id/order_time_tv"
                         android:layout_width="wrap_content"
@@ -182,7 +189,7 @@
                     android:text="16:52"
                     android:textColor="#666666"
                     android:layout_gravity="center_vertical"
-                    android:textSize="18dp" />
+                    android:textSize="12dp" />
             </LinearLayout>
 
             <LinearLayout
