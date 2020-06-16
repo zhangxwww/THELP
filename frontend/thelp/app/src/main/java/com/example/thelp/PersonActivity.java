@@ -129,6 +129,7 @@ public class PersonActivity extends AppCompatActivity {
                                         nameView.setText(name);
                                         smallNameView.setText(name);
                                         dialog.dismiss();
+                                        ((myApplication) getApplicationContext()).getUserInfo().setNickName(name);
                                         Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
                                     } else {
                                         String error = response.getString("error_msg");
@@ -175,6 +176,7 @@ public class PersonActivity extends AppCompatActivity {
                                         phoneView.setText(phone);
                                         dialog.dismiss();
                                         Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
+                                        ((myApplication) getApplicationContext()).getUserInfo().setPhone(phone);
                                     } else {
                                         String error = response.getString("error_msg");
                                         Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
@@ -214,6 +216,7 @@ public class PersonActivity extends AppCompatActivity {
                                 if (success) {
                                     signatureView.setText(signature);
                                     dialog.dismiss();
+                                    ((myApplication) getApplicationContext()).getUserInfo().setSignature(signature);
                                     Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
                                 } else {
                                     String error = response.getString("error_msg");

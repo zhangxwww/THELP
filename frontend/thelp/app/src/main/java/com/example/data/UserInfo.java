@@ -28,6 +28,20 @@ public class UserInfo {
         url = u;
     }
 
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+
+
     public static UserInfo parseFromJSONResponse(JSONObject response) throws JSONException {
         String name = response.getString("nickname");
         String avatar = url + response.getString("avatar");
