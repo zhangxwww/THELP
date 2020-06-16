@@ -61,7 +61,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.button)
     Button acceptButton;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
