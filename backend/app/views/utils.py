@@ -67,7 +67,23 @@ def generate_static_filename(name, type_):
     return os.path.join(path, filename)
 
 
-def static_filename_2_url(filename, type_):
+def delete_url_file(url, type_):
+    filename = url_2_filename(url)
+    delete_file(filename, type_)
+
+
+def delete_file(name, type_):
+    path = get_static_path(type_)
+    filename = os.path.join(path, name)
+    if os.path.exists(filename):
+        os.remove(filename)
+
+
+def url_2_filename(url):
+    return os.path.split(url)[1]
+
+
+def filename_2_url(filename, type_):
     _, name = os.path.split(filename)
     return '/static/{}/{}'.format(type_, name)
 

@@ -9,7 +9,8 @@ from app.models import User
 from .utils import session_id_required
 from .utils import generate_static_filename
 from .utils import get_user_by_session_id
-from .utils import static_filename_2_url
+from .utils import filename_2_url
+from .utils import delete_url_file
 from .return_value import success, field_required, fail
 
 user = Blueprint('user', __name__)
@@ -98,8 +99,10 @@ def upload(u=None):
         return field_required('File')
     filename = generate_static_filename(f.filename, 'avatar')
     f.save(filename)
-    u.avatar = static_filename_2_url(filename, 'avatar')
+    old = u.avatar
+    u.avatar = filename_2_url(filename, 'avatar')
     db.session.commit()
+    delete_url_file(old, 'avatar')
     return success()
 
 
