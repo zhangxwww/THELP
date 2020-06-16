@@ -59,8 +59,11 @@ public class HandlerDetailActivity extends AppCompatActivity {
     @BindView(R.id.order_ctime_tv)
     TextView orderCreateTimeView;
 
-    @BindView(R.id.button)
+    @BindView(R.id.button_accept)
     Button acceptButton;
+
+    @BindView(R.id.button_finish)
+    Button finishButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,13 @@ public class HandlerDetailActivity extends AppCompatActivity {
         new Thread(() ->
                 getOrderInfo(orderId))
                 .start();
+        int orderState = Objects.requireNonNull(
+                getIntent().getExtras()).getInt(MainActivity.ORDER_STATE);
+
+        if (orderState == MainActivity.ORDER_ACCEPTED) {
+            finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
+            acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
+        }
         bindButtonEvent(orderId);
     }
 

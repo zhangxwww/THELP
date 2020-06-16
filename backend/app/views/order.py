@@ -192,7 +192,7 @@ def abort(u=None):
     return success()
 
 
-@order.route('/access', methods=['POST'])
+@order.route('/assess', methods=['POST'])
 @session_id_required
 def access(u=None):
     order_id = request.json.get('order_id')
@@ -203,6 +203,7 @@ def access(u=None):
         return permission_denied()
     if o.state != 'finished':
         return fail('Order<id: {}> is not finished'.format(order_id))
+    o.state = 'assessed'
     assess = request.json.get('assess')
     if assess is None:
         return field_required('Assess')

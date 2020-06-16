@@ -117,8 +117,24 @@ public class Order {
         return employer_id;
     }
 
-    public String getTime() {
+    public String getStartTime() {
         return startTime;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public String getAcceptTime() {
+        return acceptTime;
+    }
+
+    public String getFinishTime() {
+        return finishTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
     }
 
     public String getAvatar() {

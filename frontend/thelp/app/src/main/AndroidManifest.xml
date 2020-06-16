@@ -28,8 +28,14 @@
         <activity android:name=".PersonActivity" />
         <activity android:name=".AddActivity">
         </activity>
-        <activity android:name=".CustomerDetailActivity" />
-        <activity android:name=".HandlerDetailActivity" />
+        <activity android:name=".CustomerDetailActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".HandlerDetailActivity">
+        </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -39,10 +45,6 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".LoginActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".AssessActivity" />
         <activity android:name=".MessageActivity">
