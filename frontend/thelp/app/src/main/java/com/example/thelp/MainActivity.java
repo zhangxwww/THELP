@@ -74,24 +74,11 @@ public class MainActivity extends AppCompatActivity {
         setupRecyclerView();
         setupAddActivityButton();
         setupRefreshLayout();
-        getUserInfo();
-        updateActivityList();
-
+        new Thread(this::getUserInfo).start();
+        new Thread(this::updateActivityList).start();
     }
 
     private void initOrderList() {
-        for (int i = 0; i < 10; i++) {
-            orderList.add(new Order("订单" + String.valueOf(i), i,
-                    "类型" + String.valueOf(i % 4 + 1),
-                    "订单详情" + String.valueOf(i + 1),
-                    "发布者" + String.valueOf(i + 1),
-                    i,
-                    "2020年7月" + String.valueOf(i) + "日",
-                    "2020年8月" + String.valueOf(i) + "日",
-                    defaultAvatar,
-                    10,
-                    "目的地" + String.valueOf(i)));
-        }
     }
 
     private void setupRecyclerView() {
