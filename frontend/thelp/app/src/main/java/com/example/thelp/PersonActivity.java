@@ -331,7 +331,7 @@ public class PersonActivity extends AppCompatActivity {
                 .into(avatarView);
         nameView.setText(userInfo.nickName);
         smallNameView.setText(userInfo.nickName);
-        scoreView.setText(String.valueOf(userInfo.score));
+        scoreView.setText("评分" + userInfo.score);
         phoneView.setText(userInfo.phone);
         signatureView.setText(userInfo.signature);
     }

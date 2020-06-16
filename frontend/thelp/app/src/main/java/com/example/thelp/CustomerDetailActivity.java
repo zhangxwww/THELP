@@ -57,6 +57,10 @@ public class CustomerDetailActivity extends AppCompatActivity {
     @BindView(R.id.button_assess)
     Button assessButton;
 
+    private static final int ASSESS_CODE = 0;
+
+    private Order order;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,7 +130,6 @@ public class CustomerDetailActivity extends AppCompatActivity {
     }
 
     private void orderStatusList(int orderId) {
-
         JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
                 orderId,
                 Order.OperationType.DETAIL,
@@ -135,7 +138,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
                     try {
                         boolean success = response.getBoolean("success");
                         if (success) {
-                            Order order = Order.parseFromJSONResponse(response, orderId);
+                            order = Order.parseFromJSONResponse(response, orderId);
                             arrayOfStatus = getDetailFromOrderDetail(order);
                             OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
                             ListView listView = findViewById(R.id.state_list);
@@ -340,7 +343,8 @@ public class CustomerDetailActivity extends AppCompatActivity {
         assessButton.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerDetailActivity.this, AssessActivity.class);
             intent.putExtra("ORDER_ID", orderId);
-            startActivity(intent);
+            intent.putExtra("HANDLER_ID", order.employee_id);
+            startActivityForResult(intent, ASSESS_CODE);
         });
 
         cancelButton.setOnClickListener(v -> {
@@ -368,5 +372,16 @@ public class CustomerDetailActivity extends AppCompatActivity {
             ListView listView = findViewById(R.id.state_list);
             listView.setAdapter(adapter);
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ASSESS_CODE) {
+            if (resultCode == RESULT_OK) {
+                assessButton.setVisibility(GONE);
+                Snackbar.make(bottomSheet, "评分成功", Snackbar.LENGTH_SHORT).show();
+            }
+        }
     }
 }

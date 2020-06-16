@@ -90,8 +90,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 getIntent().getExtras()).getInt(Order.ORDER_STATE);
 
         if (orderState == Order.ORDER_ACCEPTED) {
-            finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
-            acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
+            // 写在了showOrderInfo中
         }
         bindButtonEvent(orderId);
     }
@@ -107,9 +106,15 @@ public class HandlerDetailActivity extends AppCompatActivity {
         int myUserId = ((myApplication) getApplicationContext()).getUserInfo().userId;
         if (order.employee_id == myUserId) {
             if (order.state.equals(getResources().getString(R.string.order_accepted))) {
-                acceptButton.post(() -> acceptButton.setText(R.string.order_accepted_text));
+                acceptButton.post(() -> {
+                    acceptButton.setText(R.string.order_accepted_text);
+                    acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
+                    finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
+                });
             } else if (order.state.equals(getResources().getString(R.string.order_finished))) {
                 finishButton.post(() -> finishButton.setVisibility(View.GONE));
+            } else {
+                acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
             }
         }
     }

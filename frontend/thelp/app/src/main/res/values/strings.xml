@@ -83,4 +83,9 @@
     <string name="order_canceled">canceled</string>
     <string name="upload_succeed">上传成功</string>
     <string name="upload_failed">上传失败</string>
+    <string name="assess_l1">非常不满意</string>
+    <string name="assess_l2">不满意</string>
+    <string name="assess_l3">一般</string>
+    <string name="assess_l4">满意</string>
+    <string name="assess_l5">非常满意</string>
 </resources>

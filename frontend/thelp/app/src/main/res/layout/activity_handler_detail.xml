@@ -195,12 +195,13 @@
                 android:orientation="horizontal">
 
                 <Button
-                android:id="@+id/button_accept"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorAccent"
-                android:text="@string/accept_order_button_text"
-                android:textSize="18sp" />
+                    android:id="@+id/button_accept"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/colorAccent"
+                    android:text="@string/accept_order_button_text"
+                    android:textSize="18sp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/button_finish"

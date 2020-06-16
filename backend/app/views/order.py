@@ -203,11 +203,15 @@ def access(u=None):
         return permission_denied()
     if o.state != 'finished':
         return fail('Order<id: {}> is not finished'.format(order_id))
-    o.state = 'assessed'
     assess = request.json.get('assess')
     if assess is None:
         return field_required('Assess')
-    o.assessment = float(assess)
+    try:
+        assess = float(assess)
+    except ValueError:
+        return fail('Invalid assess type')
+    o.assessment = assess
+    o.state = 'assessed'
 
     h_id = o.handler_id
     if h_id is not None:

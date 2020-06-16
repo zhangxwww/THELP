@@ -30,7 +30,10 @@ public class UserInfo {
 
     public static UserInfo parseFromJSONResponse(JSONObject response) throws JSONException {
         String name = response.getString("nickname");
-        String avatar = url + response.getString("avatar");
+        String avatar = response.getString("avatar");
+        if (!avatar.startsWith("http")) {
+            avatar = url + avatar;
+        }
         String phone = response.getString("phone");
         int userId = response.getInt("user_id");
         String signature = response.getString("signature");
