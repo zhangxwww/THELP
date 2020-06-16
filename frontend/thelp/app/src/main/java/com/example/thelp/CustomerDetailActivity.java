@@ -350,27 +350,69 @@ public class CustomerDetailActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(v -> {
             //仿个人页的修改按钮，需要弹出框框确认中止
             //成功取消的话还需要做:
-            cancelButton.setVisibility(GONE);
-            arrayOfStatus.clear();
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_canceled_text),
-                    "", true)
+
+            JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                    orderId, Order.OperationType.CANCEL, res.getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                cancelButton.setVisibility(GONE);
+                                arrayOfStatus.clear();
+                                arrayOfStatus.add(new OrderStatusModel(
+                                        res.getString(R.string.order_canceled_text),
+                                        "", true)
+                                );
+                                OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
+                                ListView listView = findViewById(R.id.state_list);
+                                listView.setAdapter(adapter);
+                            } else {
+                                String error = response.getString("error_msg");
+                                Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
             );
-            OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
-            ListView listView = findViewById(R.id.state_list);
-            listView.setAdapter(adapter);
+            if (req != null) {
+                MySingleton.getInstance(this).addToRequestQueue(req);
+            }
         });
 
         abortButton.setOnClickListener(v -> {
             //仿个人页的修改按钮，需要弹出框框确认中止
             //成功中止的话还需要做:
-            abortButton.setVisibility(GONE);
-            cancelButton.setVisibility(View.VISIBLE);
-            handlerLayout.setVisibility(View.GONE);
-            arrayOfStatus.get(1).isAchieved = false;
-            OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
-            ListView listView = findViewById(R.id.state_list);
-            listView.setAdapter(adapter);
+
+            JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                    orderId, Order.OperationType.ABORT, res.getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                abortButton.setVisibility(GONE);
+                                cancelButton.setVisibility(View.VISIBLE);
+                                handlerLayout.setVisibility(View.GONE);
+                                arrayOfStatus.get(1).isAchieved = false;
+                                OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
+                                ListView listView = findViewById(R.id.state_list);
+                                listView.setAdapter(adapter);
+                            } else {
+                                String error = response.getString("error_msg");
+                                Snackbar.make(bottomSheet, error, Snackbar.LENGTH_SHORT).show();
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("HandlerDetail", "Fail " + error.getMessage())
+            );
+            if (req != null) {
+                MySingleton.getInstance(this).addToRequestQueue(req);
+            }
         });
     }
 

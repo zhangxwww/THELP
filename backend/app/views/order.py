@@ -187,7 +187,8 @@ def abort(u=None):
     if o.state != 'accepted':
         return fail('Order<id: {}> is not accepted'.format(order_id))
     o.state = 'active'
-    db.session.commit()
+    o.accept_time = None
+    o.handler_id = None
     db.session.commit()
     return success()
 

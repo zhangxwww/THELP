@@ -114,8 +114,10 @@ public class HandlerDetailActivity extends AppCompatActivity {
             } else if (order.state.equals(getResources().getString(R.string.order_finished))) {
                 finishButton.post(() -> finishButton.setVisibility(View.GONE));
             } else {
-                acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
+                // acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
             }
+        } else {
+            acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
         }
     }
 

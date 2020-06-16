@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private SearchCondition searchCondition = null;
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
+    private static final int CUSTOMER_DETAIL_REQUEST = 123;
 
 
     @Override
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ADD_ACTIVITY_REQUEST) {
+        if (requestCode == ADD_ACTIVITY_REQUEST || requestCode == CUSTOMER_DETAIL_REQUEST) {
             if (resultCode == RESULT_OK) {
                 updateActivityList();
             }
@@ -332,7 +333,11 @@ public class MainActivity extends AppCompatActivity {
         }
         intent.putExtra("ORDER_ID", order.getOrderId());
         intent.putExtra(Order.ORDER_STATE, Order.ORDER_NOT_ACCEPTED);
-        startActivity(intent);
+        if (id == order.employer_id) {
+            startActivityForResult(intent, CUSTOMER_DETAIL_REQUEST);
+        } else {
+            startActivity(intent);
+        }
     }
 
     private void requestOrderInPage(int page, SearchCondition sc, boolean refresh) {
