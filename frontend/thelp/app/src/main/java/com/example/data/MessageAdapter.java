@@ -11,9 +11,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.thelp.MessageActivity;
 import com.example.thelp.R;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -23,6 +21,7 @@ import cn.carbs.android.avatarimageview.library.SquareAvatarImageView;
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
     private List<Message> messageList;
     private Activity curActivity;
+    private onItemClickListener onClickListener = null;
     static class ViewHolder extends RecyclerView.ViewHolder {
         SquareAvatarImageView avatar;
         TextView name;
@@ -30,6 +29,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         TextView content;
         ImageView isRead;
         LinearLayout separator;
+        LinearLayout chatDialog;
 
         public ViewHolder(View view) {
             super(view);
@@ -39,6 +39,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             content = view.findViewById(R.id.content);
             isRead = view.findViewById(R.id.is_read);
             separator = view.findViewById(R.id.separator);
+            chatDialog = view.findViewById(R.id.chat_dialog);
         }
     }
 
@@ -77,10 +78,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         if (position == messageList.size() - 1){
             holder.separator.setVisibility(View.INVISIBLE);
         }
+
+        if (onClickListener != null) {
+            holder.chatDialog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onClickListener.onItemClick(position);
+                }
+            });
+        }
+
     }
 
     @Override
     public int getItemCount() {
         return messageList.size();
+    }
+
+    public interface onItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnClickListener(onItemClickListener listener) {
+        onClickListener = listener;
     }
 }

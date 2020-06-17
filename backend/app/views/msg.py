@@ -11,7 +11,7 @@ from geventwebsocket.websocket import WebSocket, WebSocketError
 import json
 
 from .return_value import field_required, success, fail
-from .utils import generate_static_filename
+from .utils import generate_static_filename, get_latest_message_with, datetime_2_ymdhms
 from .utils import session_id_required
 from .utils import get_message_with
 
@@ -48,6 +48,8 @@ def websocket(u=None):
     while True:
         try:
             message_received = user_socket.receive()
+            if message_received is None:
+                continue
             message_received = json.loads(message_received)
             to_id = message_received.get('to_id', None)
             content_type = message_received.get('content_type', None)
@@ -84,8 +86,8 @@ def websocket(u=None):
 @msg.route('/history', methods=['POST'])
 @session_id_required
 def history(u=None):
-    receivers = Message.query.filter(Message.from_id == u.id).distinct().all()
-    senders = Message.query.filter(Message.to_id == u.id).distinct().all()
+    receivers = Message.query.filter(Message.from_id == u.id).with_entities(Message.to_id).distinct().all()
+    senders = Message.query.filter(Message.to_id == u.id).with_entities(Message.from_id).distinct().all()
 
     related_user_ids = list(set(list(receivers)) | set(list(senders)))
 
@@ -102,9 +104,18 @@ def history(u=None):
 
     user_msg_list = []
     for uid in related_user_ids:
+        uid = uid[0]
         messages, _ = get_message_with(u.id, uid, page, per_page)
+        message = get_latest_message_with(u.id, uid)
+        other_u = User.query.filter(User.id == uid).first()
         user_msg_list.append({
             'other_id': uid,
+            'other_name': other_u.nickname,
+            'other_avatar': other_u.avatar,
+            'content': message.content,
+            'content_type': message.content_type,
+            'time': datetime_2_ymdhms(message.time),
+            'has_read': message.has_read,
             'msg_list': messages
         })
     return success({

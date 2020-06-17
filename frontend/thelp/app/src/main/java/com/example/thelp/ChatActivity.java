@@ -1,101 +1,170 @@
 package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.os.IBinder;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.data.ChatAdapter;
 import com.example.data.FullImageInfo;
 import com.example.data.GlideEngine;
 import com.example.data.Message;
-import com.example.data.OrderAdapter;
+import com.example.data.UserInfo;
+import com.example.request.MySingleton;
+import com.example.request.RequestFactory;
+import com.example.websocket.JWebSocketClient;
+import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.button.MaterialButton;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.listener.OnResultCallbackListener;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import okhttp3.OkHttpClient;
+import java.util.Map;
+import java.util.Objects;
 
 // TODO: 修改这个方法从websocket获取数据
 public class ChatActivity extends AppCompatActivity {
-    private String avatarUrl = "https://overwatch.nosdn.127.net/1/assets/img/pages/heroes/list/dva.png";
-    private String avatarUrl2 = "https://overwatch.nosdn.127.net/2/heroes/Sigma/hero-select-portrait.png";
     private List<Message> messageList = new ArrayList<>();
+    private int otherId;
+    private int selfId;
+    private String selfName = null;
+    private String selfAvatar = null;
+    private String otherName = null;
+    private String otherAvatar = null;
     private ChatAdapter adapter;
+
+    private JWebSocketClient client;
+    private JWebSocketClientService.JWebSocketClientBinder binder;
+    private JWebSocketClientService jWebSClientService;
+    private ChatActivity.ChatMessageReceiver chatMessageReceiver;
+
+
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.e("ChatActivity", "服务与活动成功绑定");
+            binder = (JWebSocketClientService.JWebSocketClientBinder) iBinder;
+            jWebSClientService = binder.getService();
+            client = jWebSClientService.client;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("ChatActivity", "服务与活动成功断开");
+        }
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        UserInfo otherUserInfo = (UserInfo) Objects.requireNonNull(
+                getIntent().getSerializableExtra(UserInfo.USER_INFO));
+        otherId = otherUserInfo.userId;
+        UserInfo selfUserInfo = ((myApplication) getApplicationContext()).getUserInfo();
+        selfId = selfUserInfo.userId;
+        selfAvatar = selfUserInfo.avatar;
+        selfName = selfUserInfo.nickName;
+        otherAvatar = otherUserInfo.avatar;
+        otherName = otherUserInfo.nickName;
+        ((TextView)findViewById(R.id.other_name)).setText(otherUserInfo.nickName);
+        //绑定服务
+        bindService();
+        //注册广播
+        doRegisterReceiver();
+
+
         setupRecyclerView();
         setupClickListeners();
+        Toolbar myToolbar = findViewById(R.id.app_bar);
+        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                int position = Objects.requireNonNull(getIntent().getExtras().getInt(MessageActivity.CHAT_POSITION));
+                intent.putExtra(MessageActivity.CHAT_POSITION, position);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
     }
 
-    private void setupChatList() {
-        for (int i = 0; i < 2; i++) {
-            messageList.add(new Message(
-                    avatarUrl, "马雨晴",
-                    "这是马雨晴发出去的消息" + String.valueOf(i),
-                    "2016年10月10日21:0" + String.valueOf(i),
-                    true,
-                    Message.TEXT,
-                    Message.SEND));
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(chatMessageReceiver);
+        unbindService(serviceConnection);
+        super.onDestroy();
+    }
+
+    private void requestMessageInPage(int page, int otherId, int selfId, boolean refresh) {
+        JsonObjectRequest req = RequestFactory.getMessageHistorySingleRequest(
+                otherId, page,
+                getResources().getString(R.string.url),
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            List<Message> messagesRaw = Message.listParseFromJSONResponse(response, selfId, getResources().getString(R.string.url));
+                            messageList.addAll(messagesRaw);
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            String error = response.getString("error_msg");
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("MessageHistorySingle", "Fail " + error.getMessage())
+        );
+        if (req != null) {
+            MySingleton.getInstance(this).addToRequestQueue(req);
         }
-        for (int i = 0; i < 3; i++) {
-            messageList.add(new Message(
-                    avatarUrl2, "张欣炜",
-                    "这是张欣炜发出去的消息" + String.valueOf(i),
-                    "2016年10月10日21:0" + String.valueOf(i),
-                    true,
-                    Message.TEXT,
-                    Message.RECEIVE));
-        }
-        messageList.add(new Message(
-                avatarUrl, "马雨晴",
-                "https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1793144512,3019469782&fm=26&gp=0.jpg",
-                "2016年10月10日21:59",
-                true,
-                Message.IMAGE,
-                Message.SEND));
-        messageList.add(new Message(
-                avatarUrl2, "张欣炜",
-                "https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1793144512,3019469782&fm=26&gp=0.jpg",
-                "2016年10月10日21:59",
-                true,
-                Message.IMAGE,
-                Message.RECEIVE));
     }
 
     // TODO: 滑动刷新
     private void setupRecyclerView() {
-        setupChatList();
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new ChatAdapter(messageList, this, R.layout.message_sent, R.layout.message_receive);
         recyclerView.setAdapter(adapter);
         setupAdapterOnClickListener();
+        requestMessageInPage(1,otherId,selfId,false);
     }
 
     private void setupAdapterOnClickListener() {
@@ -130,19 +199,19 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onResult(List<LocalMedia> result) {
                         // TODO: 发送图片消息至WebSocket
-                        for (LocalMedia localMedia: result) {
-                            String photoPath = localMedia.getPath();
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                            Date date = new Date(System.currentTimeMillis());
-                            messageList.add(new Message(
-                                    avatarUrl, "马雨晴",
-                                    photoPath,
-                                    simpleDateFormat.format(date),
-                                    true,
-                                    Message.IMAGE,
-                                    Message.SEND));
-                        }
-                        adapter.notifyDataSetChanged();
+//                        for (LocalMedia localMedia: result) {
+//                            String photoPath = localMedia.getPath();
+//                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+//                            Date date = new Date(System.currentTimeMillis());
+//                            messageList.add(new Message(
+//                                    avatarSelf, "马雨晴",
+//                                    photoPath,
+//                                    simpleDateFormat.format(date),
+//                                    true,
+//                                    Message.IMAGE,
+//                                    Message.SEND));
+//                        }
+//                        adapter.notifyDataSetChanged();
                     }
 
                     @Override
@@ -178,10 +247,37 @@ public class ChatActivity extends AppCompatActivity {
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (client != null && client.isOpen()) {
+                    //TODO json 消息
+                    Map<String, String> msg_info = new HashMap<>();
+                    msg_info.put("to_id", String.valueOf(otherId));
+                    msg_info.put("content_type", "TEXT");
+                    msg_info.put("content", Objects.requireNonNull(chatEdit.getText().toString()));
+
+                    String json = new Gson().toJson(msg_info);
+                    JSONObject jsonObject;
+                    try {
+                        jsonObject = new JSONObject(json);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    jWebSClientService.sendMsg(jsonObject.toString());
+                }else {
+                    Log.e("ChatActivity", "client 没有开启连接");
+                    try {
+                        client.connectBlocking();
+                        Log.e("ChatActivity", "client 重新连接");
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                 Date date = new Date(System.currentTimeMillis());
                 messageList.add(new Message(
-                        avatarUrl, "马雨晴",
+                        selfAvatar, selfName,
                         chatEdit.getText().toString(),
                         simpleDateFormat.format(date),
                         true,
@@ -198,4 +294,62 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
     // TODO: 发送消息、图片到websocket
+
+    /**
+     * 绑定服务
+     */
+    private void bindService() {
+        Intent bindIntent = new Intent(ChatActivity.this, JWebSocketClientService.class);
+        bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    private class ChatMessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            //TODO
+            try {
+                Log.e("CharActivity","收到广播通知:" + message);
+                JSONObject jsonObject = new JSONObject(message);
+                int fromId = jsonObject.getInt("from_id");
+                String content = jsonObject.getString("content");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                Date date = new Date(System.currentTimeMillis());
+                String contentType = jsonObject.getString("content_type");
+                int type = Message.TEXT;
+                if (contentType.equals("IMAGE")) {
+                    type = Message.IMAGE;
+                }
+                if (fromId == otherId) {
+                    requestMessageInPage(1,otherId,selfId,false);
+                } else {
+                    // TODO 弹窗显示有别人发来的新消息
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Toast toast=Toast.makeText(ChatActivity.this,"收到新消息消息:" + message ,Toast.LENGTH_SHORT    );
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+//            ChatMessage chatMessage=new ChatMessage();
+//            chatMessage.setContent(message);
+//            chatMessage.setIsMeSend(0);
+//            chatMessage.setIsRead(1);
+//            chatMessage.setTime(System.currentTimeMillis()+"");
+//            chatMessageList.add(chatMessage);
+//            initChatMsgListView();
+        }
+    }
+
+    /**
+     * 动态注册广播
+     */
+    private void doRegisterReceiver() {
+        chatMessageReceiver = new ChatActivity.ChatMessageReceiver();
+        IntentFilter filter = new IntentFilter("com.xch.servicecallback.content");
+        registerReceiver(chatMessageReceiver, filter);
+    }
+
+
 }

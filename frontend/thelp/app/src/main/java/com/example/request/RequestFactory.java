@@ -28,6 +28,10 @@ import okhttp3.RequestBody;
 public class RequestFactory {
     private static String sessionid = null;
 
+    public static String getSessionid() {
+        return sessionid;
+    }
+
     public static JsonObjectRequest getRequest(
             int method,
             String url,
@@ -241,4 +245,59 @@ public class RequestFactory {
         Call call = client.newCall(request);
         call.enqueue(callback);
     }
+
+    public static JsonObjectRequest getMessageHistorySingleRequest(
+            int otherId, int page, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("page", String.valueOf(page));
+        map.put("num_each_page", "10");
+        map.put("other_id", String.valueOf(otherId));
+        String json = new Gson().toJson(map);
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url = ip + "/msg/history/single";
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
+    public static JsonObjectRequest getMessageHistoryRequest(
+            int page, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("page", String.valueOf(page));
+        String json = new Gson().toJson(map);
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url = ip + "/msg/history";
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
 }

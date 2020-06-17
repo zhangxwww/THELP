@@ -72,10 +72,20 @@ def get_message_with(my_id, other_id, page, per_page):
             },
             'content': m.content,
             'content_type': m.content_type,
-            'time': m.time,
+            'time': datetime_2_ymdhms(m.time),
             'has_read': m.has_read
         })
     return msg_list, unread_messages
+
+
+def get_latest_message_with(my_id, other_id):
+    condition1 = and_(Message.from_id == my_id, Message.to_id == other_id)
+    condition2 = and_(Message.from_id == other_id, Message.to_id == my_id)
+    query = Message.query.filter(or_(condition1, condition2))
+
+    message = query.order_by(Message.time.desc()).first()
+
+    return message
 
 
 def session_id_required(f):
@@ -146,3 +156,10 @@ def datetime_2_mdhm(dt):
         return None
     mdhmStr = dt.strftime('%m-%d %H:%M')
     return mdhmStr
+
+
+def datetime_2_ymdhms(dt):
+    if dt is None:
+        return None
+    ymdhmsStr = dt.strftime('%Y-%m-%d %H:%M:%S')
+    return ymdhmsStr

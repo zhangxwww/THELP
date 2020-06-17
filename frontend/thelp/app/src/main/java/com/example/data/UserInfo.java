@@ -3,7 +3,9 @@ package com.example.data;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class UserInfo {
+import java.io.Serializable;
+
+public class UserInfo implements Serializable {
 
     public int userId;
     public String phone;
@@ -40,7 +42,11 @@ public class UserInfo {
         this.phone = phone;
     }
 
-
+    public static final String USER_ID = "USER_ID";
+    public static final String USER_INFO = "USER_INFO";
+    public static final String USER_IDENTIFICATION = "USER_IDENTIFICATION";
+    public static final int USER_SELF = 0;
+    public static final int USER_OTHERS = 1;
 
     public static UserInfo parseFromJSONResponse(JSONObject response) throws JSONException {
         String name = response.getString("nickname");

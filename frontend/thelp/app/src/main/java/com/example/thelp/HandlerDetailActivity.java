@@ -3,6 +3,7 @@ package com.example.thelp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -86,12 +87,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
         new Thread(() ->
                 getOrderInfo(orderId))
                 .start();
-        int orderState = Objects.requireNonNull(
-                getIntent().getExtras()).getInt(Order.ORDER_STATE);
 
-        if (orderState == Order.ORDER_ACCEPTED) {
-            // 写在了showOrderInfo中
-        }
         bindButtonEvent(orderId);
     }
 
@@ -139,6 +135,12 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         if (success) {
                             UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
                             showCustomerInfo(userInfo);
+                            aiv.setOnClickListener(v -> {
+                                Intent intent = new Intent(HandlerDetailActivity.this, PersonActivity.class);
+                                intent.putExtra(UserInfo.USER_IDENTIFICATION, UserInfo.USER_OTHERS);
+                                intent.putExtra(UserInfo.USER_INFO, userInfo);
+                                startActivity(intent);
+                            });
                         } else {
                             String error = response.getString("error_msg");
                             Log.d("Error Msg", error);

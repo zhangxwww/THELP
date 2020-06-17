@@ -69,11 +69,9 @@ public class CustomerDetailActivity extends AppCompatActivity {
         handlerLayout = this.findViewById(R.id.order_handler_layout);
         bottomSheet = findViewById(R.id.bottom_sheet);
 
-//        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
-//        orderStatusList(orderId);
+        orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
+        orderStatusList(orderId);
 
-        orderId = 0;
-        initOrderStatusList();
         aiv = (AvatarImageView) this.findViewById(R.id.order_avatar_image);
         Glide
                 .with(this)
@@ -83,50 +81,6 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
         mMapView = (MapView) findViewById(R.id.bmapView);
         bindButtonEvent(orderId);
-    }
-
-    //用于不连数据库调试
-    private void initOrderStatusList(){
-        Resources res = CustomerDetailActivity.this.getResources();
-
-        String stat = res.getString(R.string.order_finished);
-        if (stat.equals(res.getString(R.string.order_canceled))) {
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_canceled_text),
-                    "", true)
-            );
-            handlerLayout.setVisibility(GONE);
-        } else {
-            int stateCode = 0;
-            if (stat.equals(res.getString(R.string.order_active))) {
-                stateCode = 1;
-                handlerLayout.setVisibility(GONE);
-                cancelButton.post(() -> cancelButton.setVisibility(View.VISIBLE));
-            } else if (stat.equals(res.getString(R.string.order_accepted))) {
-                stateCode = 2;
-                abortButton.post(() -> abortButton.setVisibility(View.VISIBLE));
-            } else if (stat.equals(res.getString(R.string.order_finished))) {
-                stateCode = 3;
-                assessButton.post(() -> assessButton.setVisibility(View.VISIBLE));
-            } else if (stat.equals(res.getString(R.string.order_assessed))) {
-                stateCode = 4;
-            }
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_active_text),
-                    "00:00", stateCode >= 1));
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_accepted_text),
-                    "22:22", stateCode >= 2 ));
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_finished_text),
-                    "66:66", stateCode >= 3));
-            arrayOfStatus.add(new OrderStatusModel(
-                    res.getString(R.string.order_assessed_text),
-                    "", stateCode == 4));
-        }
-        OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
-        ListView listView = findViewById(R.id.state_list);
-        listView.setAdapter(adapter);
     }
 
     private void orderStatusList(int orderId) {
@@ -185,6 +139,12 @@ public class CustomerDetailActivity extends AppCompatActivity {
                         boolean success = response.getBoolean("success");
                         if (success) {
                             UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
+                            aiv.setOnClickListener(v -> {
+                                Intent intent = new Intent(CustomerDetailActivity.this, PersonActivity.class);
+                                intent.putExtra(UserInfo.USER_IDENTIFICATION, UserInfo.USER_OTHERS);
+                                intent.putExtra(UserInfo.USER_INFO, userInfo);
+                                startActivity(intent);
+                            });
                             showHandlerInfo(userInfo.nickName, String.valueOf(userInfo.nickName), userInfo.avatar);
                         } else {
                             String error = response.getString("error_msg");
@@ -415,6 +375,8 @@ public class CustomerDetailActivity extends AppCompatActivity {
                 MySingleton.getInstance(this).addToRequestQueue(req);
             }
         });
+
+
     }
 
     @Override

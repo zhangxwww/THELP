@@ -21,7 +21,6 @@ import com.example.request.RequestFactory;
 import org.json.JSONException;
 
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.carbs.android.avatarimageview.library.AvatarImageView;

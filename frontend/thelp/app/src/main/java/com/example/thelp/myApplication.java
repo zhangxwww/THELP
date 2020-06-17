@@ -5,10 +5,12 @@ import android.app.Application;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.example.data.UserInfo;
+import com.example.websocket.JWebSocketClient;
 
 public class myApplication extends Application {
 
     private UserInfo userInfo = null;
+    private JWebSocketClient webSocketClient = null;
 
     @Override
     public void onCreate() {

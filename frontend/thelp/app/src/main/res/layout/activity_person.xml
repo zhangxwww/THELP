@@ -82,6 +82,7 @@
                     android:orientation="horizontal">
 
                     <ImageButton
+                        android:id="@+id/button_phone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@color/colorBackground"
@@ -99,10 +100,10 @@
                     android:orientation="horizontal">
 
                     <ImageButton
+                        android:id="@+id/button_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@color/colorBackground"
-                        android:contentDescription="TODO"
                         android:src="@drawable/ic_textsms_24px_black" />
                 </LinearLayout>
             </RelativeLayout>
@@ -231,44 +232,51 @@
                 </RelativeLayout>
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="密码"
-                android:textColor="@color/colorOnPrimary"
-                android:textSize="18sp" />
-
             <LinearLayout
+                android:id="@+id/password_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="30dp">
+                    android:layout_marginTop="20dp"
+                    android:text="密码"
+                    android:textColor="@color/colorOnPrimary"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:id="@+id/password"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="50dp"
-                        android:text="********************"
-                        android:textColor="@color/colorOnPrimary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/modify_password_button"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="修改"
-                        android:textColor="@color/colorAccentVariant"
-                        android:textSize="15sp" />
-                </RelativeLayout>
+                        android:layout_marginEnd="30dp">
+
+                        <TextView
+                            android:id="@+id/password"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="50dp"
+                            android:text="********************"
+                            android:textColor="@color/colorOnPrimary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/modify_password_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="修改"
+                            android:textColor="@color/colorAccentVariant"
+                            android:textSize="15sp" />
+                    </RelativeLayout>
+                </LinearLayout>
             </LinearLayout>
+
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

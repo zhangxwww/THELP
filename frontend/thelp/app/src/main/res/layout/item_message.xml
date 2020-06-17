@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chat_dialog"
+    android:clickable="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_marginHorizontal="20dp">
+    android:layout_marginHorizontal="20dp"
+    android:focusable="true">
     <cn.carbs.android.avatarimageview.library.SquareAvatarImageView
         android:id="@+id/avatar"
         android:layout_width="40dp"

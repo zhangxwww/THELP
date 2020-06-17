@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,47 +90,176 @@ public class PersonActivity extends AppCompatActivity {
         setContentView(R.layout.activity_person);
         ButterKnife.bind(this);
 
+        int userIdentification = Objects.requireNonNull(
+                getIntent().getExtras()).getInt(UserInfo.USER_IDENTIFICATION);
+
+        setModifyButtons(userIdentification);
+        setContactButtons(userIdentification);
+        showUserInfo(userIdentification);
+        setNavButton();
+
+
+
+
+    }
+
+    private void setNavButton() {
+        ImageButton navBack = findViewById(R.id.button_back);
+        navBack.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            finish();
+        });
+    }
+
+    private void setContactButtons(int userIdentification) {
+        ImageButton textButton = findViewById(R.id.button_text);
+        ImageButton callButton = findViewById(R.id.button_phone);
+        if (userIdentification == UserInfo.USER_SELF) {
+            textButton.setVisibility(View.INVISIBLE);
+            callButton.setVisibility(View.INVISIBLE);
+        } else if (userIdentification == UserInfo.USER_OTHERS) {
+            textButton.setOnClickListener(v -> {
+                Intent intent = new Intent(PersonActivity.this, ChatActivity.class);
+                UserInfo otherUserInfo = (UserInfo) Objects.requireNonNull(
+                        getIntent().getSerializableExtra(UserInfo.USER_INFO));
+                intent.putExtra(UserInfo.USER_INFO, otherUserInfo);
+                startActivity(intent);
+            });
+        }
+    }
+
+    private void setModifyButtons(int userIdentification) {
+        Context ctx = this;
         TextView modifyNameButton = findViewById(R.id.modify_name_button);
         TextView modifyPhoneButton = findViewById(R.id.modify_phone_button);
         TextView modifyPasswordButton = findViewById(R.id.modify_password_button);
         TextView modifySignatureButton = findViewById(R.id.modify_signature_button);
 
-        ImageButton navBack = findViewById(R.id.button_back);
-        navBack.setOnClickListener(v -> backToMainActivity());
+        if (userIdentification == UserInfo.USER_OTHERS) {
+            modifyNameButton.setVisibility(View.INVISIBLE);
+            modifyPhoneButton.setVisibility(View.INVISIBLE);
+            modifyPasswordButton.setVisibility(View.INVISIBLE);
+            modifySignatureButton.setVisibility(View.INVISIBLE);
+            LinearLayout password = findViewById(R.id.password_layout);
+            password.setVisibility(View.INVISIBLE);
+        } else if (userIdentification == UserInfo.USER_SELF) {
+            modifyNameButton.setOnClickListener(v -> {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
+                        .setTitle("修改用户名")
+                        .setMessage("请输入修改后的内容并点击确定");
+                View view = getLayoutInflater().inflate(R.layout.input_modify, null);
+                builder.setView(view);
+                builder.setNegativeButton("确定", (dialog, which) -> {
+                    TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
+                    String name = Objects.requireNonNull(textInputEditText.getText()).toString();
+                    CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
+                    if (name.length() >= 11) {
+                        dialog.cancel();
+                        Snackbar.make(cl, getResources().getString(R.string.helper_text), Snackbar.LENGTH_LONG).show();
+                    } else if (name.length() == 0) {
+                        dialog.cancel();
+                        Snackbar.make(cl, getResources().getString(R.string.name_required), Snackbar.LENGTH_LONG).show();
+                    } else {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("nickname", name);
+                        JsonObjectRequest req = RequestFactory.getUserEditRequest(
+                                map, getResources().getString(R.string.url),
+                                response -> {
+                                    try {
+                                        boolean success = response.getBoolean("success");
+                                        if (success) {
+                                            nameView.setText(name);
+                                            smallNameView.setText(name);
+                                            dialog.dismiss();
+                                            ((myApplication) getApplicationContext()).getUserInfo().setNickName(name);
+                                            Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
+                                        } else {
+                                            String error = response.getString("error_msg");
+                                            Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
+                                            Log.d("Error Msg", error);
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                },
+                                error -> Log.d("PersonEdit", "Fail " + error.getMessage())
+                        );
+                        MySingleton.getInstance(PersonActivity.this).addToRequestQueue(req);
+                    }
+                })
+                        .setPositiveButton("取消", null)
+                        .show();
+            });
 
-        Context ctx = this;
 
-        showUserInfo();
+            modifyPhoneButton.setOnClickListener(v -> {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
+                        .setTitle("修改手机号")
+                        .setMessage("请输入修改后的内容并点击确定");
 
-        modifyNameButton.setOnClickListener(v -> {
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
-                    .setTitle("修改用户名")
-                    .setMessage("请输入修改后的内容并点击确定");
-            View view = getLayoutInflater().inflate(R.layout.input_modify, null);
-            builder.setView(view);
-            builder.setNegativeButton("确定", (dialog, which) -> {
-                TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
-                String name = Objects.requireNonNull(textInputEditText.getText()).toString();
-                CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
-                if (name.length() >= 11) {
-                    dialog.cancel();
-                    Snackbar.make(cl, getResources().getString(R.string.helper_text), Snackbar.LENGTH_LONG).show();
-                } else if (name.length() == 0) {
-                    dialog.cancel();
-                    Snackbar.make(cl, getResources().getString(R.string.name_required), Snackbar.LENGTH_LONG).show();
-                } else {
+                View view = getLayoutInflater().inflate(R.layout.input_modify, null);
+                builder.setView(view);
+                builder.setNegativeButton("确定", (dialog, which) -> {
+                    TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
+                    String phone = Objects.requireNonNull(textInputEditText.getText()).toString();
+                    CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
+                    if (phone.length() != 11) {
+                        dialog.cancel();
+                        Snackbar.make(cl, getResources().getString(R.string.helper_text), Snackbar.LENGTH_LONG).show();
+                    } else {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("phone", phone);
+                        JsonObjectRequest req = RequestFactory.getUserEditRequest(
+                                map, getResources().getString(R.string.url),
+                                response -> {
+                                    try {
+                                        boolean success = response.getBoolean("success");
+                                        if (success) {
+                                            phoneView.setText(phone);
+                                            dialog.dismiss();
+                                            Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
+                                            ((myApplication) getApplicationContext()).getUserInfo().setPhone(phone);
+                                        } else {
+                                            String error = response.getString("error_msg");
+                                            Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
+                                            Log.d("Error Msg", error);
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                },
+                                error -> Log.d("PersonEdit", "Fail " + error.getMessage())
+                        );
+                        MySingleton.getInstance(PersonActivity.this).addToRequestQueue(req);
+                    }
+                })
+                        .setPositiveButton("取消", null)
+                        .show();
+            });
+
+            modifySignatureButton.setOnClickListener(v -> {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
+                        .setTitle("修改签名")
+                        .setMessage("请输入修改后的内容并点击确定");
+
+                View view = getLayoutInflater().inflate(R.layout.input_modify, null);
+                builder.setView(view);
+                builder.setNegativeButton("确定", (dialog, which) -> {
+                    TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
+                    String signature = Objects.requireNonNull(textInputEditText.getText()).toString();
+                    CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
                     HashMap<String, String> map = new HashMap<>();
-                    map.put("nickname", name);
+                    map.put("signature", signature);
                     JsonObjectRequest req = RequestFactory.getUserEditRequest(
                             map, getResources().getString(R.string.url),
                             response -> {
                                 try {
                                     boolean success = response.getBoolean("success");
                                     if (success) {
-                                        nameView.setText(name);
-                                        smallNameView.setText(name);
+                                        signatureView.setText(signature);
                                         dialog.dismiss();
-                                        ((myApplication) getApplicationContext()).getUserInfo().setNickName(name);
+                                        ((myApplication) getApplicationContext()).getUserInfo().setSignature(signature);
                                         Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
                                     } else {
                                         String error = response.getString("error_msg");
@@ -143,40 +273,41 @@ public class PersonActivity extends AppCompatActivity {
                             error -> Log.d("PersonEdit", "Fail " + error.getMessage())
                     );
                     MySingleton.getInstance(PersonActivity.this).addToRequestQueue(req);
-                }
-            })
-                    .setPositiveButton("取消", null)
-                    .show();
-        });
+                })
+                        .setPositiveButton("取消", null)
+                        .show();
+            });
 
+            modifyPasswordButton.setOnClickListener(v -> {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
+                        .setTitle("修改密码")
+                        .setMessage("请输入修改前后的密码并点击确定");
 
-        modifyPhoneButton.setOnClickListener(v -> {
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
-                    .setTitle("修改手机号")
-                    .setMessage("请输入修改后的内容并点击确定");
-
-            View view = getLayoutInflater().inflate(R.layout.input_modify, null);
-            builder.setView(view);
-            builder.setNegativeButton("确定", (dialog, which) -> {
-                TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
-                String phone = Objects.requireNonNull(textInputEditText.getText()).toString();
-                CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
-                if (phone.length() != 11) {
-                    dialog.cancel();
-                    Snackbar.make(cl, getResources().getString(R.string.helper_text), Snackbar.LENGTH_LONG).show();
-                } else {
+                View view = getLayoutInflater().inflate(R.layout.password_modify, null);
+                builder.setView(view);
+                builder.setNegativeButton("确定", (dialog, which) -> {
+                    TextInputEditText oldText = view.findViewById(R.id.old_text);
+                    TextInputEditText newText = view.findViewById(R.id.new_text);
+                    String oldPassword = Objects.requireNonNull(oldText.getText()).toString();
+                    String newPassword = Objects.requireNonNull(newText.getText()).toString();
+                    CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
+                    if (oldPassword.length() == 0) {
+                        Snackbar.make(cl, getResources().getString(R.string.modify_password_old_hint), Snackbar.LENGTH_LONG).show();
+                    }
+                    if (newPassword.length() == 0) {
+                        Snackbar.make(cl, getResources().getString(R.string.modify_password_new_hint), Snackbar.LENGTH_LONG).show();
+                    }
                     HashMap<String, String> map = new HashMap<>();
-                    map.put("phone", phone);
+                    map.put("password_old", SHA.parse(oldPassword));
+                    map.put("password_new", SHA.parse(newPassword));
                     JsonObjectRequest req = RequestFactory.getUserEditRequest(
                             map, getResources().getString(R.string.url),
                             response -> {
                                 try {
                                     boolean success = response.getBoolean("success");
                                     if (success) {
-                                        phoneView.setText(phone);
                                         dialog.dismiss();
                                         Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
-                                        ((myApplication) getApplicationContext()).getUserInfo().setPhone(phone);
                                     } else {
                                         String error = response.getString("error_msg");
                                         Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
@@ -189,144 +320,64 @@ public class PersonActivity extends AppCompatActivity {
                             error -> Log.d("PersonEdit", "Fail " + error.getMessage())
                     );
                     MySingleton.getInstance(PersonActivity.this).addToRequestQueue(req);
-                }
-            })
-                    .setPositiveButton("取消", null)
-                    .show();
-        });
+                })
+                        .setPositiveButton("取消", null)
+                        .show();
+            });
 
-        modifySignatureButton.setOnClickListener(v -> {
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
-                    .setTitle("修改签名")
-                    .setMessage("请输入修改后的内容并点击确定");
+            avatarView.setOnClickListener(v -> {
+                PictureSelector.create(this)
+                        .openGallery(PictureMimeType.ofAll())
+                        .loadImageEngine(GlideEngine.createGlideEngine())
+                        .maxSelectNum(1)
+                        .minSelectNum(1)
+                        .forResult(new OnResultCallbackListener<LocalMedia>() {
+                            @Override
+                            public void onResult(List<LocalMedia> result) {
+                                if (result.size() > 0) {
+                                    CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
+                                    String photoPath = result.get(0).getRealPath();
 
-            View view = getLayoutInflater().inflate(R.layout.input_modify, null);
-            builder.setView(view);
-            builder.setNegativeButton("确定", (dialog, which) -> {
-                TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
-                String signature = Objects.requireNonNull(textInputEditText.getText()).toString();
-                CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
-                HashMap<String, String> map = new HashMap<>();
-                map.put("signature", signature);
-                JsonObjectRequest req = RequestFactory.getUserEditRequest(
-                        map, getResources().getString(R.string.url),
-                        response -> {
-                            try {
-                                boolean success = response.getBoolean("success");
-                                if (success) {
-                                    signatureView.setText(signature);
-                                    dialog.dismiss();
-                                    ((myApplication) getApplicationContext()).getUserInfo().setSignature(signature);
-                                    Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
-                                } else {
-                                    String error = response.getString("error_msg");
-                                    Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
-                                    Log.d("Error Msg", error);
+                                    new Thread(() -> {
+                                        File file = new File(photoPath);
+                                        RequestFactory.uploadFile(
+                                                file,
+                                                getResources().getString(R.string.url),
+                                                new Callback() {
+                                                    @Override
+                                                    public void onFailure(Call call, IOException e) {
+                                                        e.printStackTrace();
+                                                        Snackbar.make(cl, getResources().getString(R.string.upload_failed), Snackbar.LENGTH_LONG).show();
+                                                    }
+
+                                                    @Override
+                                                    public void onResponse(Call call, Response response) throws IOException {
+                                                        Snackbar.make(cl, getResources().getString(R.string.upload_succeed), Snackbar.LENGTH_LONG).show();
+                                                        updateUserInfo();
+                                                    }
+                                                });
+                                    }).start();
                                 }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
-                        },
-                        error -> Log.d("PersonEdit", "Fail " + error.getMessage())
-                );
-                MySingleton.getInstance(PersonActivity.this).addToRequestQueue(req);
-            })
-                    .setPositiveButton("取消", null)
-                    .show();
-        });
 
-        modifyPasswordButton.setOnClickListener(v -> {
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ctx)
-                    .setTitle("修改密码")
-                    .setMessage("请输入修改前后的密码并点击确定");
-
-            View view = getLayoutInflater().inflate(R.layout.password_modify, null);
-            builder.setView(view);
-            builder.setNegativeButton("确定", (dialog, which) -> {
-                TextInputEditText oldText = view.findViewById(R.id.old_text);
-                TextInputEditText newText = view.findViewById(R.id.new_text);
-                String oldPassword = Objects.requireNonNull(oldText.getText()).toString();
-                String newPassword = Objects.requireNonNull(newText.getText()).toString();
-                CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
-                if (oldPassword.length() == 0) {
-                    Snackbar.make(cl, getResources().getString(R.string.modify_password_old_hint), Snackbar.LENGTH_LONG).show();
-                }
-                if (newPassword.length() == 0) {
-                    Snackbar.make(cl, getResources().getString(R.string.modify_password_new_hint), Snackbar.LENGTH_LONG).show();
-                }
-                HashMap<String, String> map = new HashMap<>();
-                map.put("password_old", SHA.parse(oldPassword));
-                map.put("password_new", SHA.parse(newPassword));
-                JsonObjectRequest req = RequestFactory.getUserEditRequest(
-                        map, getResources().getString(R.string.url),
-                        response -> {
-                            try {
-                                boolean success = response.getBoolean("success");
-                                if (success) {
-                                    dialog.dismiss();
-                                    Snackbar.make(cl, getResources().getString(R.string.edit_succeed), Snackbar.LENGTH_LONG).show();
-                                } else {
-                                    String error = response.getString("error_msg");
-                                    Snackbar.make(cl, error, Snackbar.LENGTH_LONG).show();
-                                    Log.d("Error Msg", error);
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                            @Override
+                            public void onCancel() {
+                                // onCancel Callback
                             }
-                        },
-                        error -> Log.d("PersonEdit", "Fail " + error.getMessage())
-                );
-                MySingleton.getInstance(PersonActivity.this).addToRequestQueue(req);
-            })
-                    .setPositiveButton("取消", null)
-                    .show();
-        });
-
-        avatarView.setOnClickListener(v -> {
-            PictureSelector.create(this)
-                    .openGallery(PictureMimeType.ofAll())
-                    .loadImageEngine(GlideEngine.createGlideEngine())
-                    .maxSelectNum(1)
-                    .minSelectNum(1)
-                    .forResult(new OnResultCallbackListener<LocalMedia>() {
-                        @Override
-                        public void onResult(List<LocalMedia> result) {
-                            if (result.size() > 0) {
-                                CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
-                                String photoPath = result.get(0).getRealPath();
-
-                                new Thread(() -> {
-                                    File file = new File(photoPath);
-                                    RequestFactory.uploadFile(
-                                            file,
-                                            getResources().getString(R.string.url),
-                                            new Callback() {
-                                                @Override
-                                                public void onFailure(Call call, IOException e) {
-                                                    e.printStackTrace();
-                                                    Snackbar.make(cl, getResources().getString(R.string.upload_failed), Snackbar.LENGTH_LONG).show();
-                                                }
-
-                                                @Override
-                                                public void onResponse(Call call, Response response) throws IOException {
-                                                    Snackbar.make(cl, getResources().getString(R.string.upload_succeed), Snackbar.LENGTH_LONG).show();
-                                                    updateUserInfo();
-                                                }
-                                            });
-                                }).start();
-                            }
-                        }
-
-                        @Override
-                        public void onCancel() {
-                            // onCancel Callback
-                        }
-                    });
-        });
+                        });
+            });
+        }
     }
 
-    private void showUserInfo() {
-        UserInfo userInfo = ((myApplication) getApplicationContext()).getUserInfo();
+    private void showUserInfo(int userIdentification) {
+        UserInfo userInfo = null;
+        if (userIdentification == UserInfo.USER_SELF) {
+            userInfo = ((myApplication) getApplicationContext()).getUserInfo();
+        } else if (userIdentification == UserInfo.USER_OTHERS) {
+            userInfo = (UserInfo) Objects.requireNonNull(
+                    getIntent().getSerializableExtra(UserInfo.USER_INFO));
+        }
+
         Glide
                 .with(this)
                 .load(userInfo.avatar)
@@ -350,7 +401,7 @@ public class PersonActivity extends AppCompatActivity {
                             myApplication myApp = (myApplication) getApplicationContext();
                             UserInfo userInfo = UserInfo.parseFromJSONResponse(response);
                             myApp.setUserInfo(userInfo);
-                            showUserInfo();
+                            showUserInfo(UserInfo.USER_SELF);
                         } else {
                             CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
                             String error = response.getString("error_msg");

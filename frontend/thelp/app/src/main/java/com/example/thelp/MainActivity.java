@@ -1,6 +1,5 @@
 package com.example.thelp;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -8,24 +7,40 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.example.data.Message;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
 import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
+import com.example.websocket.JWebSocketClient;
+import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
@@ -47,12 +62,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+    private Context mContext;
     private String defaultAvatar;
     private Drawer drawer;
     private MaterialSearchView searchView;
@@ -64,11 +82,29 @@ public class MainActivity extends AppCompatActivity {
     private static final int ADD_ACTIVITY_REQUEST = 233;
     private static final int CUSTOMER_DETAIL_REQUEST = 123;
 
+    private JWebSocketClientService.JWebSocketClientBinder binder;
+    private JWebSocketClientService jWebSClientService;
+    private ChatMessageReceiver chatMessageReceiver;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.e("MainActivity", "服务与活动成功绑定");
+            binder = (JWebSocketClientService.JWebSocketClientBinder) iBinder;
+            jWebSClientService = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("MainActivity", "服务与活动成功断开");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = MainActivity.this;
         defaultAvatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
         setupDrawer("温斯顿", "17777777777", defaultAvatar);
         setupActionBar();
@@ -78,13 +114,22 @@ public class MainActivity extends AppCompatActivity {
         setupRefreshLayout();
         new Thread(this::getUserInfo).start();
         new Thread(this::updateActivityList).start();
+
+        //启动服务
+        startJWebSClientService();
+        //绑定服务
+        bindService();
+        //注册广播
+        doRegisterReceiver();
+        //检测通知是否开启
+        checkNotification(mContext);
     }
 
     private void initOrderList() {
     }
 
     private void setupRecyclerView() {
-        initOrderList();
+//        initOrderList();
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -211,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                         Intent intent = null;
                         if (id == 2) {
                             intent = new Intent(MainActivity.this, PersonActivity.class);
+                            intent.putExtra(UserInfo.USER_IDENTIFICATION, UserInfo.USER_SELF);
                         } else if (id == 3) {
                             intent = new Intent(MainActivity.this, HistoryActivity.class);
                         } else if (id == 4) {
@@ -441,5 +487,135 @@ public class MainActivity extends AppCompatActivity {
             }
             return map;
         }
+    }
+
+
+    /**
+     * 绑定服务
+     */
+    private void bindService() {
+        Log.e("MainActivity", "bing Service");
+        Intent bindIntent = new Intent(mContext, JWebSocketClientService.class);
+        bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+    /**
+     * 启动服务（websocket客户端服务）
+     */
+    private void startJWebSClientService() {
+        Log.e("MainActivity","Start WebSocketClientService.");
+        Intent intent = new Intent(mContext, JWebSocketClientService.class);
+        startService(intent);
+    }
+    /**
+     * 动态注册广播
+     */
+    private void doRegisterReceiver() {
+        chatMessageReceiver = new ChatMessageReceiver();
+        IntentFilter filter = new IntentFilter("com.xch.servicecallback.content");
+        registerReceiver(chatMessageReceiver, filter);
+    }
+
+    private class ChatMessageReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            //TODO
+            Toast toast=Toast.makeText(mContext,"收到新消息消息:" + message ,Toast.LENGTH_SHORT    );
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+//            ChatMessage chatMessage=new ChatMessage();
+//            chatMessage.setContent(message);
+//            chatMessage.setIsMeSend(0);
+//            chatMessage.setIsRead(1);
+//            chatMessage.setTime(System.currentTimeMillis()+"");
+//            chatMessageList.add(chatMessage);
+//            initChatMsgListView();
+        }
+    }
+
+    /**
+     * 检测是否开启通知
+     *
+     * @param context
+     */
+    private void checkNotification(final Context context) {
+        if (!isNotificationEnabled(context)) {
+            new AlertDialog.Builder(context).setTitle("温馨提示")
+                    .setMessage("你还未开启系统通知，将影响消息的接收，要去开启吗？")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            setNotification(context);
+                        }
+                    }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            }).show();
+        }
+    }
+    /**
+     * 如果没有开启通知，跳转至设置界面
+     *
+     * @param context
+     */
+    private void setNotification(Context context) {
+        Intent localIntent = new Intent();
+        //直接跳转到应用通知设置的代码：
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            localIntent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            localIntent.putExtra("app_package", context.getPackageName());
+            localIntent.putExtra("app_uid", context.getApplicationInfo().uid);
+        } else if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+            localIntent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            localIntent.addCategory(Intent.CATEGORY_DEFAULT);
+            localIntent.setData(Uri.parse("package:" + context.getPackageName()));
+        } else {
+            //4.4以下没有从app跳转到应用通知设置页面的Action，可考虑跳转到应用详情页面,
+            localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (Build.VERSION.SDK_INT >= 9) {
+                localIntent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+                localIntent.setData(Uri.fromParts("package", context.getPackageName(), null));
+            } else if (Build.VERSION.SDK_INT <= 8) {
+                localIntent.setAction(Intent.ACTION_VIEW);
+                localIntent.setClassName("com.android.settings", "com.android.setting.InstalledAppDetails");
+                localIntent.putExtra("com.android.settings.ApplicationPkgName", context.getPackageName());
+            }
+        }
+        context.startActivity(localIntent);
+    }
+
+    /**
+     * 获取通知权限,监测是否开启了系统通知
+     *
+     * @param context
+     */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private boolean isNotificationEnabled(Context context) {
+
+        String CHECK_OP_NO_THROW = "checkOpNoThrow";
+        String OP_POST_NOTIFICATION = "OP_POST_NOTIFICATION";
+
+        AppOpsManager mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        String pkg = context.getApplicationContext().getPackageName();
+        int uid = appInfo.uid;
+
+        Class appOpsClass = null;
+        try {
+            appOpsClass = Class.forName(AppOpsManager.class.getName());
+            Method checkOpNoThrowMethod = appOpsClass.getMethod(CHECK_OP_NO_THROW, Integer.TYPE, Integer.TYPE,
+                    String.class);
+            Field opPostNotificationValue = appOpsClass.getDeclaredField(OP_POST_NOTIFICATION);
+
+            int value = (Integer) opPostNotificationValue.get(Integer.class);
+            return ((Integer) checkOpNoThrowMethod.invoke(mAppOps, value, uid, pkg) == AppOpsManager.MODE_ALLOWED);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

@@ -20,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <service android:name="com.example.websocket.JWebSocketClientService"
+            android:enabled="true"
+            android:exported="true" />
         <activity android:name=".FullImageActivity" />
         <activity android:name=".ChatActivity">
         </activity>
@@ -51,14 +54,15 @@
         </activity>
 
         <!-- myq -->
-        <!--
+
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="7WkhGAbZeg71QOYF4M5b9ubG03ONwj4R" />
-            -->
         <!-- zxw -->
+        <!--
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="KYwl0Gs1yvATayc0gggchplcbUFB2LxA" />
+            -->
     </application>
 </manifest>
