@@ -103,9 +103,8 @@ public class JWebSocketClientService extends Service {
      * 初始化websocket连接
      */
     private void initSocketClient() {
-//        String url = getResources().getString(R.string.url) + "/msg/websocket";
-        String url = "ws://192.168.1.6:5000/msg/websocket";
-        URI uri = URI.create("ws://192.168.1.6:5000/msg/websocket");
+        String url = "ws" + getResources().getString(R.string.url).substring(4) + "/msg/websocket";
+        URI uri = URI.create(url);
         Map<String,String> header = new HashMap<String, String>();
         header.put("Cookie", RequestFactory.getSessionid());
         client = new JWebSocketClient(uri, header) {

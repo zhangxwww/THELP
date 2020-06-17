@@ -105,7 +105,7 @@ def history(u=None):
     user_msg_list = []
     for uid in related_user_ids:
         uid = uid[0]
-        messages, _ = get_message_with(u.id, uid, page, per_page)
+        # messages, _ = get_message_with(u.id, uid, page, per_page)
         message = get_latest_message_with(u.id, uid)
         other_u = User.query.filter(User.id == uid).first()
         user_msg_list.append({
@@ -116,7 +116,6 @@ def history(u=None):
             'content_type': message.content_type,
             'time': datetime_2_ymdhms(message.time),
             'has_read': message.has_read,
-            'msg_list': messages
         })
     return success({
         'user_msg_list': user_msg_list
