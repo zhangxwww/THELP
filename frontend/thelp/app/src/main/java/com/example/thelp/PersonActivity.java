@@ -343,6 +343,7 @@ public class PersonActivity extends AppCompatActivity {
                                         RequestFactory.uploadFile(
                                                 file,
                                                 getResources().getString(R.string.url),
+                                                "/user",
                                                 new Callback() {
                                                     @Override
                                                     public void onFailure(Call call, IOException e) {

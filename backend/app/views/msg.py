@@ -11,7 +11,7 @@ from geventwebsocket.websocket import WebSocket, WebSocketError
 import json
 
 from .return_value import field_required, success, fail
-from .utils import generate_static_filename, get_latest_message_with, datetime_2_ymdhms
+from .utils import generate_static_filename, get_latest_message_with, datetime_2_ymdhms, filename_2_url
 from .utils import session_id_required
 from .utils import get_message_with
 
@@ -47,6 +47,8 @@ def websocket(u=None):
     while True:
         try:
             message_received = user_socket.receive()
+            if message_received is None:
+                continue
             message_received = json.loads(message_received)
             to_id = message_received.get('to_id', None)
             content_type = message_received.get('content_type', None)
@@ -57,9 +59,10 @@ def websocket(u=None):
                 r = ImageNameRelation.query.filter(ImageNameRelation.raw_name == content).first()
                 if r is None:
                     continue
-                content = r.generated_name
+                content = filename_2_url(r.generated_name,'image')
             message_send = {
                 'from_id': from_id,
+                'name': u.nickname,
                 'content_type': content_type,
                 'content': content
             }

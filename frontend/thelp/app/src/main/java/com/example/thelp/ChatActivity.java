@@ -2,6 +2,7 @@ package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +20,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +36,7 @@ import com.example.request.RequestFactory;
 import com.example.websocket.JWebSocketClient;
 import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.luck.picture.lib.PictureSelector;
@@ -44,6 +48,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,9 +58,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+
 // TODO: 修改这个方法从websocket获取数据
 public class ChatActivity extends AppCompatActivity {
     private List<Message> messageList = new ArrayList<>();
+    RecyclerView recyclerView = null;
     private int otherId;
     private int selfId;
     private String selfName = null;
@@ -62,12 +73,12 @@ public class ChatActivity extends AppCompatActivity {
     private String otherName = null;
     private String otherAvatar = null;
     private ChatAdapter adapter;
+    private Context context;
 
     private JWebSocketClient client;
     private JWebSocketClientService.JWebSocketClientBinder binder;
     private JWebSocketClientService jWebSClientService;
     private ChatActivity.ChatMessageReceiver chatMessageReceiver;
-
 
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -86,7 +97,6 @@ public class ChatActivity extends AppCompatActivity {
     };
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,12 +111,13 @@ public class ChatActivity extends AppCompatActivity {
         selfName = selfUserInfo.nickName;
         otherAvatar = otherUserInfo.avatar;
         otherName = otherUserInfo.nickName;
-        ((TextView)findViewById(R.id.other_name)).setText(otherUserInfo.nickName);
-        //绑定服务
-        bindService();
-        //注册广播
-        doRegisterReceiver();
+        ((TextView) findViewById(R.id.other_name)).setText(otherUserInfo.nickName);
+        recyclerView = findViewById(R.id.recycler_view);
+        context = ChatActivity.this;
 
+        bindService();
+
+        doRegisterReceiver();
 
         setupRecyclerView();
         setupClickListeners();
@@ -141,6 +152,7 @@ public class ChatActivity extends AppCompatActivity {
                             List<Message> messagesRaw = Message.listParseFromJSONResponse(response, selfId, getResources().getString(R.string.url));
                             messageList.addAll(messagesRaw);
                             adapter.notifyDataSetChanged();
+                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                         } else {
                             String error = response.getString("error_msg");
                             Log.d("Error Msg", error);
@@ -158,13 +170,13 @@ public class ChatActivity extends AppCompatActivity {
 
     // TODO: 滑动刷新
     private void setupRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new ChatAdapter(messageList, this, R.layout.message_sent, R.layout.message_receive);
         recyclerView.setAdapter(adapter);
         setupAdapterOnClickListener();
-        requestMessageInPage(1,otherId,selfId,false);
+        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        requestMessageInPage(1, otherId, selfId, false);
     }
 
     private void setupAdapterOnClickListener() {
@@ -198,20 +210,62 @@ public class ChatActivity extends AppCompatActivity {
                 .forResult(new OnResultCallbackListener<LocalMedia>() {
                     @Override
                     public void onResult(List<LocalMedia> result) {
-                        // TODO: 发送图片消息至WebSocket
-//                        for (LocalMedia localMedia: result) {
-//                            String photoPath = localMedia.getPath();
-//                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-//                            Date date = new Date(System.currentTimeMillis());
-//                            messageList.add(new Message(
-//                                    avatarSelf, "马雨晴",
-//                                    photoPath,
-//                                    simpleDateFormat.format(date),
-//                                    true,
-//                                    Message.IMAGE,
-//                                    Message.SEND));
-//                        }
-//                        adapter.notifyDataSetChanged();
+                        RelativeLayout cl = findViewById(R.id.chat_activity_bg);
+                        for (LocalMedia localMedia : result) {
+                            String photoPath = localMedia.getPath();
+                            // 先上传图片
+                            new Thread(() -> {
+                                File file = new File(photoPath);
+                                RequestFactory.uploadFile(
+                                        file,
+                                        getResources().getString(R.string.url),
+                                        "/msg",
+                                        new Callback() {
+                                            @Override
+                                            public void onFailure(Call call, IOException e) {
+                                                e.printStackTrace();
+                                                Snackbar.make(cl, getResources().getString(R.string.send_image_failed), Snackbar.LENGTH_LONG).show();
+                                            }
+
+                                            @Override
+                                            public void onResponse(Call call, Response response) throws IOException {
+                                                ((ChatActivity) context).runOnUiThread(() -> {
+                                                    //此时已在主线程中，可以更新UI了
+                                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                                    Date date = new Date(System.currentTimeMillis());
+                                                    messageList.add(new Message(
+                                                            selfAvatar, selfName,
+                                                            photoPath,
+                                                            simpleDateFormat.format(date),
+                                                            true,
+                                                            Message.IMAGE,
+                                                            Message.SEND));
+                                                    adapter.notifyDataSetChanged();
+                                                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                                                    });
+
+                                                // 发送图片到webSocket
+                                                Map<String, String> msg_info = new HashMap<>();
+                                                msg_info.put("to_id", String.valueOf(otherId));
+                                                msg_info.put("content_type", "IMAGE");
+                                                msg_info.put("content", file.getName());
+
+                                                String json = new Gson().toJson(msg_info);
+                                                JSONObject jsonObject;
+                                                try {
+                                                    jsonObject = new JSONObject(json);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                    return;
+                                                }
+                                                jWebSClientService.sendMsg(jsonObject.toString());
+                                                Snackbar.make(cl, getResources().getString(R.string.send_image_succeed), Snackbar.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }).start();
+
+                        }
+
                     }
 
                     @Override
@@ -221,6 +275,12 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+    private void addMessage(Message msg) {
+        messageList.add(msg);
+        adapter.notifyDataSetChanged();
+        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+
+    }
     private void setupClickListeners() {
         ImageButton imageSelect = findViewById(R.id.image_select);
         imageSelect.setOnClickListener(new View.OnClickListener() {
@@ -248,7 +308,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (client != null && client.isOpen()) {
-                    //TODO json 消息
+                    // 发送文字到webSocket
                     Map<String, String> msg_info = new HashMap<>();
                     msg_info.put("to_id", String.valueOf(otherId));
                     msg_info.put("content_type", "TEXT");
@@ -263,15 +323,8 @@ public class ChatActivity extends AppCompatActivity {
                         return;
                     }
                     jWebSClientService.sendMsg(jsonObject.toString());
-                }else {
-                    Log.e("ChatActivity", "client 没有开启连接");
-                    try {
-                        client.connectBlocking();
-                        Log.e("ChatActivity", "client 重新连接");
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                } else {
+                    //TODO
                 }
 
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
@@ -284,12 +337,11 @@ public class ChatActivity extends AppCompatActivity {
                         Message.TEXT,
                         Message.SEND));
                 adapter.notifyDataSetChanged();
+                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                 chatEdit.clearFocus();
                 chatEdit.setText("");
                 InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(ChatActivity.INPUT_METHOD_SERVICE);
                 inputMethodManager.hideSoftInputFromWindow(chatEdit.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                // TODO: 发送到websocket
-                // TODO: 自动下拉视角到最底端？
             }
         });
     }
@@ -309,36 +361,13 @@ public class ChatActivity extends AppCompatActivity {
             String message = intent.getStringExtra("message");
             //TODO
             try {
-                Log.e("CharActivity","收到广播通知:" + message);
-                JSONObject jsonObject = new JSONObject(message);
-                int fromId = jsonObject.getInt("from_id");
-                String content = jsonObject.getString("content");
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                Date date = new Date(System.currentTimeMillis());
-                String contentType = jsonObject.getString("content_type");
-                int type = Message.TEXT;
-                if (contentType.equals("IMAGE")) {
-                    type = Message.IMAGE;
-                }
-                if (fromId == otherId) {
-                    requestMessageInPage(1,otherId,selfId,false);
-                } else {
-                    // TODO 弹窗显示有别人发来的新消息
+                Message msg = Message.parseFromWebSocketRsponse(message);
+                if (msg.getId() == otherId) {
+                    requestMessageInPage(1, otherId, selfId, false);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            Toast toast=Toast.makeText(ChatActivity.this,"收到新消息消息:" + message ,Toast.LENGTH_SHORT    );
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
-//            ChatMessage chatMessage=new ChatMessage();
-//            chatMessage.setContent(message);
-//            chatMessage.setIsMeSend(0);
-//            chatMessage.setIsRead(1);
-//            chatMessage.setTime(System.currentTimeMillis()+"");
-//            chatMessageList.add(chatMessage);
-//            initChatMsgListView();
         }
     }
 

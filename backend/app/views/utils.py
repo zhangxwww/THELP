@@ -1,6 +1,6 @@
 from flask import session
 
-from app.models import User
+from app.models import User, ImageNameRelation
 from app.models import Order
 from app.models import Message
 
@@ -58,7 +58,6 @@ def get_message_with(my_id, other_id, page, per_page):
 
         from_user = User.query.filter(User.id == from_id).first()
         to_user = User.query.filter(User.id == to_id).first()
-
         msg_list.append({
             'from': {
                 'id': from_id,

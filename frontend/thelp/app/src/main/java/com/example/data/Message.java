@@ -1,5 +1,7 @@
 package com.example.data;
 
+import android.media.MediaExtractor;
+
 import com.example.thelp.R;
 import com.google.gson.JsonObject;
 
@@ -7,7 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Message {
@@ -97,7 +101,23 @@ public class Message {
         isRead = read;
     }
 
-    public static List<Message> listParseFromJSONResponse(JSONObject response, int selfId, String url) throws JSONException {
+    public static Message parseFromWebSocketRsponse(String message) throws JSONException {
+        JSONObject jsonObject = new JSONObject(message);
+        int fromId = jsonObject.getInt("from_id");
+        String content = jsonObject.getString("content");
+        String name = jsonObject.getString("name");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        Date date = new Date(System.currentTimeMillis());
+        String contentType = jsonObject.getString("content_type");
+        int type = Message.TEXT;
+        if (contentType.equals("IMAGE")) {
+            type = Message.IMAGE;
+        }
+        Message msg = new Message(fromId, null, name, content, simpleDateFormat.format(date), false, type);
+        return msg;
+
+    }
+    public static List<Message> listParseFromJSONResponse(JSONObject response, int selfId, String ip) throws JSONException {
         JSONArray list = response.getJSONArray("msg_list");
         int len = list.length();
         List<Message> messageList = new ArrayList<>();
@@ -107,7 +127,7 @@ public class Message {
             int fromId = from.getInt("id");
             String avatar = from.getString("avatar");
             if (!avatar.startsWith("http")) {
-                avatar = url + avatar;
+                avatar = ip + avatar;
             }
             String name = from.getString("name");
             JSONObject to = msg.getJSONObject("to");
@@ -124,6 +144,7 @@ public class Message {
             int type = TEXT;
             if (contentType.equals("IMAGE")) {
                 type = IMAGE;
+                content = ip + content;
             }
             String time = msg.getString("time");
             boolean has_read = msg.getBoolean("has_read");

@@ -228,7 +228,7 @@ public class RequestFactory {
         );
     }
 
-    public static void uploadFile(File file, String ip, Callback callback) {
+    public static void uploadFile(File file, String ip, String area, Callback callback) {
         OkHttpClient client = new OkHttpClient();
         MediaType contentType = MediaType.parse("text/plain");
         RequestBody body = new MultipartBody.Builder()
@@ -236,7 +236,7 @@ public class RequestFactory {
                 .addFormDataPart("file", file.getName(), RequestBody.create(contentType, file))
                 .build();
         // RequestBody body = RequestBody.create(contentType, file);
-        String url = ip + "/user/upload";
+        String url = ip + area + "/upload";
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(url)
                 .post(body)

@@ -52,7 +52,7 @@ public class JWebSocketClientService extends Service {
         //初始化websocket
         initSocketClient();
         Log.e("JWebSClientService", "服务开启");
-//        mHandler.postDelayed(heartBeatRunnable, HEART_BEAT_RATE);//开启心跳检测
+        mHandler.postDelayed(heartBeatRunnable, HEART_BEAT_RATE);//开启心跳检测
 
         //设置service为前台服务，提高优先级
 //        if (Build.VERSION.SDK_INT < 18) {

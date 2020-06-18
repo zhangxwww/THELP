@@ -255,4 +255,6 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
         );
         MySingleton.getInstance(this).addToRequestQueue(addNewActivityRequest);
     }
+
+
 }

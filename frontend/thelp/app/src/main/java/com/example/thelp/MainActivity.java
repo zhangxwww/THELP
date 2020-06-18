@@ -34,11 +34,13 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.data.Message;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
 import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
+import com.example.websocket.ChatMessageReceiver;
 import com.example.websocket.JWebSocketClient;
 import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -498,41 +500,27 @@ public class MainActivity extends AppCompatActivity {
         Intent bindIntent = new Intent(mContext, JWebSocketClientService.class);
         bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
     }
+
     /**
      * 启动服务（websocket客户端服务）
      */
     private void startJWebSClientService() {
-        Log.e("MainActivity","Start WebSocketClientService.");
+        Log.e("MainActivity", "Start WebSocketClientService.");
         Intent intent = new Intent(mContext, JWebSocketClientService.class);
         startService(intent);
     }
+
     /**
      * 动态注册广播
      */
     private void doRegisterReceiver() {
-        chatMessageReceiver = new ChatMessageReceiver();
+        CoordinatorLayout cl = findViewById(R.id.main_background);
+        chatMessageReceiver = new ChatMessageReceiver(cl);
         IntentFilter filter = new IntentFilter("com.xch.servicecallback.content");
         registerReceiver(chatMessageReceiver, filter);
     }
 
-    private class ChatMessageReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            //TODO
-            Toast toast=Toast.makeText(mContext,"收到新消息消息:" + message ,Toast.LENGTH_SHORT    );
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
-//            ChatMessage chatMessage=new ChatMessage();
-//            chatMessage.setContent(message);
-//            chatMessage.setIsMeSend(0);
-//            chatMessage.setIsRead(1);
-//            chatMessage.setTime(System.currentTimeMillis()+"");
-//            chatMessageList.add(chatMessage);
-//            initChatMsgListView();
-        }
-    }
 
     /**
      * 检测是否开启通知
@@ -556,6 +544,7 @@ public class MainActivity extends AppCompatActivity {
             }).show();
         }
     }
+
     /**
      * 如果没有开启通知，跳转至设置界面
      *
@@ -617,5 +606,18 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        unregisterReceiver(chatMessageReceiver);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(mContext, JWebSocketClientService.class);
+        stopService(intent);
     }
 }
