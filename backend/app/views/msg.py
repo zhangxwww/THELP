@@ -43,13 +43,10 @@ def websocket(u=None):
     if not user_socket:
         return fail('Websocket required')
     from_id = u.id
-    user_socket_dict[from_id] = user_socket
-
+    user_socket_dict[str(from_id)] = user_socket
     while True:
         try:
             message_received = user_socket.receive()
-            if message_received is None:
-                continue
             message_received = json.loads(message_received)
             to_id = message_received.get('to_id', None)
             content_type = message_received.get('content_type', None)
@@ -73,8 +70,7 @@ def websocket(u=None):
             )
             db.session.add(m)
             db.session.commit()
-
-            to_user_socket = user_socket_dict.get(to_id, None)
+            to_user_socket = user_socket_dict.get(str(to_id), None)
             if to_user_socket is not None:
                 to_user_socket.send(json.dumps(message_send))
         except WebSocketError as e:
@@ -108,6 +104,9 @@ def history(u=None):
         # messages, _ = get_message_with(u.id, uid, page, per_page)
         message = get_latest_message_with(u.id, uid)
         other_u = User.query.filter(User.id == uid).first()
+        has_read = message.has_read
+        if message.from_id == u.id:
+            has_read = True
         user_msg_list.append({
             'other_id': uid,
             'other_name': other_u.nickname,
@@ -115,7 +114,7 @@ def history(u=None):
             'content': message.content,
             'content_type': message.content_type,
             'time': datetime_2_ymdhms(message.time),
-            'has_read': message.has_read,
+            'has_read': has_read,
         })
     return success({
         'user_msg_list': user_msg_list
