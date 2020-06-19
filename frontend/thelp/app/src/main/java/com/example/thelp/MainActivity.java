@@ -1,5 +1,24 @@
 package com.example.thelp;
 
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.AppOpsManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -7,41 +26,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.app.AppOpsManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.example.data.Message;
 import com.example.data.Order;
 import com.example.data.OrderAdapter;
 import com.example.data.UserInfo;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
 import com.example.websocket.ChatMessageReceiver;
-import com.example.websocket.JWebSocketClient;
 import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -84,23 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int ADD_ACTIVITY_REQUEST = 233;
     private static final int CUSTOMER_DETAIL_REQUEST = 123;
 
-    private JWebSocketClientService.JWebSocketClientBinder binder;
-    private JWebSocketClientService jWebSClientService;
     private ChatMessageReceiver chatMessageReceiver;
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            Log.e("MainActivity", "服务与活动成功绑定");
-            binder = (JWebSocketClientService.JWebSocketClientBinder) iBinder;
-            jWebSClientService = binder.getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            Log.e("MainActivity", "服务与活动成功断开");
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,21 +93,13 @@ public class MainActivity extends AppCompatActivity {
         new Thread(this::getUserInfo).start();
         new Thread(this::updateActivityList).start();
 
-        //启动服务
         startJWebSClientService();
-        //绑定服务
-        bindService();
-        //注册广播
         doRegisterReceiver();
         //检测通知是否开启
-        checkNotification(mContext);
-    }
-
-    private void initOrderList() {
+//        checkNotification(mContext);
     }
 
     private void setupRecyclerView() {
-//        initOrderList();
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -491,33 +459,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * 绑定服务
-     */
-    private void bindService() {
-        Log.e("MainActivity", "bing Service");
-        Intent bindIntent = new Intent(mContext, JWebSocketClientService.class);
-        bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
-    }
-
-    /**
-     * 启动服务（websocket客户端服务）
-     */
     private void startJWebSClientService() {
         Log.e("MainActivity", "Start WebSocketClientService.");
         Intent intent = new Intent(mContext, JWebSocketClientService.class);
         startService(intent);
     }
 
-    /**
-     * 动态注册广播
-     */
     private void doRegisterReceiver() {
-        CoordinatorLayout cl = findViewById(R.id.main_background);
-        chatMessageReceiver = new ChatMessageReceiver(cl);
-        IntentFilter filter = new IntentFilter("com.xch.servicecallback.content");
-        registerReceiver(chatMessageReceiver, filter);
+        if (chatMessageReceiver == null) {
+            CoordinatorLayout cl = findViewById(R.id.main_background);
+            chatMessageReceiver = new ChatMessageReceiver(cl);
+            IntentFilter filter = new IntentFilter("com.example.websocket.receive");
+            registerReceiver(chatMessageReceiver, filter);
+        }
     }
 
 
@@ -608,11 +562,17 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        unregisterReceiver(chatMessageReceiver);
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        doRegisterReceiver();
+//    }
+//
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        unregisterReceiver(chatMessageReceiver);
+//    }
 
     @Override
     public void onDestroy() {

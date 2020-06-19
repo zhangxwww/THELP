@@ -32,20 +32,18 @@ import java.util.Map;
 public class JWebSocketClientService extends Service {
     public JWebSocketClient client;
     private JWebSocketClientBinder mBinder = mBinder = new JWebSocketClientBinder();
-    //用于Activity和service通讯
+
     public class JWebSocketClientBinder extends Binder {
         public JWebSocketClientService getService() {
             return JWebSocketClientService.this;
         }
     }
 
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -69,8 +67,6 @@ public class JWebSocketClientService extends Service {
 //        }
 //
 //        acquireWakeLock();
-
-
         return START_STICKY;
     }
 
@@ -113,7 +109,7 @@ public class JWebSocketClientService extends Service {
                 Log.e("JWebSocketClientService", "收到的消息：" + message);
                 // TODO
                 Intent intent = new Intent();
-                intent.setAction("com.xch.servicecallback.content");
+                intent.setAction("com.example.websocket.receive");
                 intent.putExtra("message", message);
                 sendBroadcast(intent);
 //                checkLockAndShowNotification(message);

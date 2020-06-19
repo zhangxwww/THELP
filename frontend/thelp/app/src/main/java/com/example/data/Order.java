@@ -32,6 +32,8 @@ public class Order {
     public String targetLocation;
     public String handlerLocation;
 
+    public final static String[] types = new String[] {"跑腿", "借取", "寻物", "答疑", "其它"};
+
     public Order() {
 
     }

@@ -121,10 +121,9 @@ public class Message {
         JSONArray list = response.getJSONArray("msg_list");
         int len = list.length();
         List<Message> messageList = new ArrayList<>();
-        for (int i = len - 1; i >= 0; i--) {
+        for (int i = 0; i < len; i++) {
             JSONObject msg = (JSONObject) list.get(i);
             JSONObject from = msg.getJSONObject("from");
-            int fromId = from.getInt("id");
             String avatar = from.getString("avatar");
             if (!avatar.startsWith("http")) {
                 avatar = ip + avatar;

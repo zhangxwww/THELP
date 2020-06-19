@@ -1,5 +1,7 @@
 package com.example.data;
 
+import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ public class OrderAdapter
 
     private List<Order> orderList;
     private onDetailClickListener onDetailClickListener = null;
+
     class ViewHolder extends RecyclerView.ViewHolder {
         ImageView orderImage;
         TextView orderTitle;
@@ -27,6 +30,7 @@ public class OrderAdapter
         MaterialButton viewButton;
         TextView orderTime;
         TextView orderPublish;
+        ImageView orderTypeIcon;
 
         public ViewHolder(View view) {
             super(view);
@@ -37,6 +41,7 @@ public class OrderAdapter
             orderTime = view.findViewById(R.id.order_time);
             orderPublish = view.findViewById(R.id.order_publish);
             viewButton = view.findViewById(R.id.view_button);
+            orderTypeIcon = view.findViewById(R.id.order_type_icon);
             viewButton.setOnClickListener(OrderAdapter.this);
         }
     }
@@ -61,6 +66,19 @@ public class OrderAdapter
         holder.orderPublish.setText(order.getEmployer());
         holder.orderTime.setText(order.getStartTime());
         holder.viewButton.setTag(position);
+        if (order.getType().equals(Order.types[0])) {
+            holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype1);
+        } else if (order.getType().equals(Order.types[1])) {
+            holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype2);
+        } else if (order.getType().equals(Order.types[2])) {
+            holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype3);
+        } else if (order.getType().equals(Order.types[3])) {
+            holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype4);
+        } else {
+            holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype5);
+        }
+
+
     }
 
     @Override

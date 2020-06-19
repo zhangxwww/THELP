@@ -135,6 +135,7 @@
                         android:inputType="none">
 
                         <AutoCompleteTextView
+                            android:id="@+id/type_dropdownmenu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none" />

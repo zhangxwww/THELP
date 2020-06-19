@@ -1,11 +1,5 @@
 package com.example.thelp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,15 +9,18 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.data.ChatAdapter;
@@ -38,7 +35,6 @@ import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
@@ -62,7 +58,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-// TODO: 修改这个方法从websocket获取数据
+
 public class ChatActivity extends AppCompatActivity {
     private List<Message> messageList = new ArrayList<>();
     RecyclerView recyclerView = null;
@@ -70,13 +66,12 @@ public class ChatActivity extends AppCompatActivity {
     private int selfId;
     private String selfName = null;
     private String selfAvatar = null;
-    private String otherName = null;
-    private String otherAvatar = null;
     private ChatAdapter adapter;
     private Context context;
+    private int numPerPage = 10;
+    private int page = 1;
 
     private JWebSocketClient client;
-    private JWebSocketClientService.JWebSocketClientBinder binder;
     private JWebSocketClientService jWebSClientService;
     private ChatActivity.ChatMessageReceiver chatMessageReceiver;
 
@@ -85,7 +80,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             Log.e("ChatActivity", "服务与活动成功绑定");
-            binder = (JWebSocketClientService.JWebSocketClientBinder) iBinder;
+            JWebSocketClientService.JWebSocketClientBinder binder = (JWebSocketClientService.JWebSocketClientBinder) iBinder;
             jWebSClientService = binder.getService();
             client = jWebSClientService.client;
         }
@@ -109,28 +104,24 @@ public class ChatActivity extends AppCompatActivity {
         selfId = selfUserInfo.userId;
         selfAvatar = selfUserInfo.avatar;
         selfName = selfUserInfo.nickName;
-        otherAvatar = otherUserInfo.avatar;
-        otherName = otherUserInfo.nickName;
         ((TextView) findViewById(R.id.other_name)).setText(otherUserInfo.nickName);
         recyclerView = findViewById(R.id.recycler_view);
         context = ChatActivity.this;
 
         bindService();
-
         doRegisterReceiver();
 
         setupRecyclerView();
+        setupRefreshLayout();
         setupClickListeners();
         Toolbar myToolbar = findViewById(R.id.app_bar);
-        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                int position = Objects.requireNonNull(getIntent().getExtras().getInt(MessageActivity.CHAT_POSITION));
-                intent.putExtra(MessageActivity.CHAT_POSITION, position);
-                setResult(RESULT_OK, intent);
-                finish();
-            }
+
+        myToolbar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent();
+            int position = Objects.requireNonNull(getIntent().getExtras().getInt(MessageActivity.CHAT_POSITION));
+            intent.putExtra(MessageActivity.CHAT_POSITION, position);
+            setResult(RESULT_OK, intent);
+            finish();
         });
     }
 
@@ -141,18 +132,33 @@ public class ChatActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void requestMessageInPage(int page, int otherId, int selfId, boolean refresh) {
+    private void getMoreData() {
+        page += 1;
+        requestMessageInPage(page, false);
+    }
+
+    private void requestMessageInPage(int page, boolean refresh) {
         JsonObjectRequest req = RequestFactory.getMessageHistorySingleRequest(
-                otherId, page,
+                otherId, page, numPerPage,
                 getResources().getString(R.string.url),
                 response -> {
                     try {
                         boolean success = response.getBoolean("success");
                         if (success) {
                             List<Message> messagesRaw = Message.listParseFromJSONResponse(response, selfId, getResources().getString(R.string.url));
+
+
+                            if (refresh) {
+                                messageList.clear();
+                                ChatActivity.this.page = 1;
+                            }
                             messageList.addAll(messagesRaw);
                             adapter.notifyDataSetChanged();
-                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                            if (refresh) {
+                                recyclerView.scrollToPosition(0);
+                            } else {
+                                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                            }
                         } else {
                             String error = response.getString("error_msg");
                             Log.d("Error Msg", error);
@@ -171,13 +177,24 @@ public class ChatActivity extends AppCompatActivity {
     // TODO: 滑动刷新
     private void setupRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);//布局反向
+        linearLayoutManager.setStackFromEnd(true);//数据反向
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new ChatAdapter(messageList, this, R.layout.message_sent, R.layout.message_receive);
         recyclerView.setAdapter(adapter);
         setupAdapterOnClickListener();
-        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-        requestMessageInPage(1, otherId, selfId, false);
+        requestMessageInPage(1, true);
     }
+
+    private void setupRefreshLayout() {
+        SwipeRefreshLayout layout = findViewById(R.id.layout_swipe_refresh);
+        layout.setOnRefreshListener(() -> {
+            layout.setRefreshing(true);
+            getMoreData();
+            layout.setRefreshing(false);
+        });
+    }
+
 
     private void setupAdapterOnClickListener() {
         this.adapter.setClickListener(new ChatAdapter.OnItemClickedListener() {
@@ -275,81 +292,61 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
-    private void addMessage(Message msg) {
-        messageList.add(msg);
-        adapter.notifyDataSetChanged();
-        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-
-    }
     private void setupClickListeners() {
         ImageButton imageSelect = findViewById(R.id.image_select);
-        imageSelect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickSelectImage();
-            }
-        });
+        imageSelect.setOnClickListener(v -> onClickSelectImage());
 
         EditText chatEdit = findViewById(R.id.edit_text);
         MaterialButton confirmButton = findViewById(R.id.confirm_button);
 
-        chatEdit.setOnFocusChangeListener(new android.view.View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    confirmButton.setVisibility(View.VISIBLE);
-                } else {
-                    confirmButton.setVisibility(View.GONE);
-                }
+        chatEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                confirmButton.setVisibility(View.VISIBLE);
+            } else {
+                confirmButton.setVisibility(View.GONE);
             }
         });
 
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (client != null && client.isOpen()) {
-                    // 发送文字到webSocket
-                    Map<String, String> msg_info = new HashMap<>();
-                    msg_info.put("to_id", String.valueOf(otherId));
-                    msg_info.put("content_type", "TEXT");
-                    msg_info.put("content", Objects.requireNonNull(chatEdit.getText().toString()));
+        confirmButton.setOnClickListener(v -> {
 
-                    String json = new Gson().toJson(msg_info);
-                    JSONObject jsonObject;
-                    try {
-                        jsonObject = new JSONObject(json);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    jWebSClientService.sendMsg(jsonObject.toString());
-                } else {
-                    //TODO
+            if (client != null && client.isOpen()) {
+                // 发送文字到webSocket
+                Map<String, String> msg_info = new HashMap<>();
+                msg_info.put("to_id", String.valueOf(otherId));
+                msg_info.put("content_type", "TEXT");
+                msg_info.put("content", Objects.requireNonNull(chatEdit.getText().toString()));
+
+                String json = new Gson().toJson(msg_info);
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject(json);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return;
                 }
-
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                Date date = new Date(System.currentTimeMillis());
-                messageList.add(new Message(
-                        selfAvatar, selfName,
-                        chatEdit.getText().toString(),
-                        simpleDateFormat.format(date),
-                        true,
-                        Message.TEXT,
-                        Message.SEND));
-                adapter.notifyDataSetChanged();
-                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-                chatEdit.clearFocus();
-                chatEdit.setText("");
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(ChatActivity.INPUT_METHOD_SERVICE);
-                inputMethodManager.hideSoftInputFromWindow(chatEdit.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                jWebSClientService.sendMsg(jsonObject.toString());
+            } else {
+                //TODO
             }
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            Date date = new Date(System.currentTimeMillis());
+            messageList.add(0, new Message(
+                    selfAvatar, selfName,
+                    chatEdit.getText().toString(),
+                    simpleDateFormat.format(date),
+                    true,
+                    Message.TEXT,
+                    Message.SEND));
+            adapter.notifyDataSetChanged();
+            recyclerView.scrollToPosition(0);
+            chatEdit.clearFocus();
+            chatEdit.setText("");
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(ChatActivity.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(chatEdit.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         });
     }
-    // TODO: 发送消息、图片到websocket
 
-    /**
-     * 绑定服务
-     */
     private void bindService() {
         Intent bindIntent = new Intent(ChatActivity.this, JWebSocketClientService.class);
         bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
@@ -359,11 +356,10 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");
-            //TODO
             try {
                 Message msg = Message.parseFromWebSocketRsponse(message);
                 if (msg.getId() == otherId) {
-                    requestMessageInPage(1, otherId, selfId, false);
+                    requestMessageInPage(1, true);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -371,12 +367,9 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * 动态注册广播
-     */
     private void doRegisterReceiver() {
         chatMessageReceiver = new ChatActivity.ChatMessageReceiver();
-        IntentFilter filter = new IntentFilter("com.xch.servicecallback.content");
+        IntentFilter filter = new IntentFilter("com.example.websocket.receive");
         registerReceiver(chatMessageReceiver, filter);
     }
 

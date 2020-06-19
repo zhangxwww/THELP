@@ -247,13 +247,13 @@ public class RequestFactory {
     }
 
     public static JsonObjectRequest getMessageHistorySingleRequest(
-            int otherId, int page, String ip,
+            int otherId, int page, int numPerPage, String ip,
             Response.Listener<JSONObject> listener,
             Response.ErrorListener errorListener) {
 
         Map<String, String> map = new HashMap<>();
         map.put("page", String.valueOf(page));
-        map.put("num_each_page", "10");
+        map.put("num_each_page", String.valueOf(numPerPage));
         map.put("other_id", String.valueOf(otherId));
         String json = new Gson().toJson(map);
 

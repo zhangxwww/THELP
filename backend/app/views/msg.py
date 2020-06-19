@@ -38,12 +38,12 @@ user_socket_dict = {}
 @session_id_required
 def websocket(u=None):
     global user_socket_dict
-
     user_socket = request.environ.get('wsgi.websocket')
     if not user_socket:
         return fail('Websocket required')
     from_id = u.id
     user_socket_dict[str(from_id)] = user_socket
+    print("User ", from_id, " connected.")
     while True:
         try:
             message_received = user_socket.receive()
@@ -78,8 +78,10 @@ def websocket(u=None):
                 to_user_socket.send(json.dumps(message_send))
         except WebSocketError as e:
             print(e)
-            user_socket_dict.pop(from_id)
+            print("User ", from_id, " disconnected.")
+            user_socket_dict.pop(str(from_id))
             break
+    return fail('Websocket end')
 
 
 @msg.route('/history', methods=['POST'])

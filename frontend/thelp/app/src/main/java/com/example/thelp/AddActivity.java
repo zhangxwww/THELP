@@ -9,12 +9,14 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.data.Order;
 import com.example.request.MySingleton;
 import com.example.request.RequestFactory;
 import com.google.android.material.snackbar.Snackbar;
@@ -38,6 +40,7 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
     private TimePickerDialog endTimePickerDialog;
     private TextInputLayout startTime;
     private TextInputLayout endTime;
+    private AutoCompleteTextView orderTypeDropDownMenu;
     SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
@@ -46,6 +49,7 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
         setContentView(R.layout.activity_add);
         setupDateTimePicker();
         setupToolbar();
+        setupOrderTypeDropDownMenu();
     }
 
     @Override
@@ -61,6 +65,19 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
     public String getDateToString(long time) {
         Date d = new Date(time);
         return sf.format(d);
+    }
+
+    private void setupOrderTypeDropDownMenu() {
+
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(AddActivity.this,
+                        R.layout.item_dropdownmenu,
+                        Order.types);
+
+        orderTypeDropDownMenu = findViewById(R.id.type_dropdownmenu);
+        orderTypeDropDownMenu.setAdapter(adapter);
+
     }
 
     private void setupToolbar() {
