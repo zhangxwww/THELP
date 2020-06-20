@@ -18,7 +18,7 @@
     <string name="center">个人中心</string>
     <string name="pm">私信</string>
     <string name="order">历史订单</string>
-    <string name="search_hint">输入时间、类型或关键字</string>
+    <string name="search_hint">输入关键字或\'all\'</string>
     <string name="app_label">推荐搜索</string>
     <string name="search_title">搜索</string>
     <string name="description_placeholder">这里是背景简介</string>
@@ -43,6 +43,11 @@
     <string name="start_time_hint">2020.7.11 17:59</string>
     <string name="button_revise_time_text">修改</string>
     <string name="end_time_label">结束时间</string>
+    <string name="default_no_limit_time">默认无时间限制</string>
+    <string name="default_no_limit_type">默认无类型限制</string>
+    <string name="search_reward_hint">赏金下限</string>
+    <string name="search_start_time_hint">晚于此时间开始</string>
+    <string name="search_end_time_hint">早于此时间结束</string>
     <string name="submit">提交</string>
     <string name="title_required">请输入订单标题</string>
     <string name="title_too_long">标题过长</string>
@@ -63,10 +68,6 @@
     <string name="message_read">已读消息</string>
     <string name="message_unread">未读消息</string>
     <string name="appeal">申诉</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="tab_title">tabTitleAdapter</string>
-    <string name="detail_long_placeholder">病情分析：       左下方胸部是不是胃的部位？有一点疼痛，不排除是胃的症状，可能平常饮食不注意，有胃炎的情况存在       指导意见：       笑得很厉害的时候有胸闷的情况问题不大，如果胸闷经常发生，而且伴随其他不适，需要完善肺功能等检查，排除是哮喘或者是支气管的症状</string>
     <string name="modify_hint">请输入修改后的内容</string>
     <string name="modify_password_old_hint">请输入原密码</string>
     <string name="modify_password_new_hint">请输入新密码</string>
@@ -90,4 +91,10 @@
     <string name="assess_l3">一般</string>
     <string name="assess_l4">满意</string>
     <string name="assess_l5">非常满意</string>
+    <string name="no_search_order">没有符合条件的订单</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tab_title">tabTitleAdapter</string>
+    <string name="detail_long_placeholder">病情分析：       左下方胸部是不是胃的部位？有一点疼痛，不排除是胃的症状，可能平常饮食不注意，有胃炎的情况存在       指导意见：       笑得很厉害的时候有胸闷的情况问题不大，如果胸闷经常发生，而且伴随其他不适，需要完善肺功能等检查，排除是哮喘或者是支气管的症状</string>
+
 </resources>

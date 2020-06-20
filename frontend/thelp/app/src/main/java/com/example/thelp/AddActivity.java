@@ -68,8 +68,6 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
     }
 
     private void setupOrderTypeDropDownMenu() {
-
-
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(AddActivity.this,
                         R.layout.item_dropdownmenu,
@@ -77,7 +75,6 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
 
         orderTypeDropDownMenu = findViewById(R.id.type_dropdownmenu);
         orderTypeDropDownMenu.setAdapter(adapter);
-
     }
 
     private void setupToolbar() {

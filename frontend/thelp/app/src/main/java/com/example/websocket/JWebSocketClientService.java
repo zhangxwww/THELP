@@ -106,7 +106,7 @@ public class JWebSocketClientService extends Service {
         client = new JWebSocketClient(uri, header) {
             @Override
             public void onMessage(String message) {
-                Log.e("JWebSocketClientService", "收到的消息：" + message);
+                Log.d("JWebSocketClientService", "收到的消息：" + message);
                 // TODO
                 Intent intent = new Intent();
                 intent.setAction("com.example.websocket.receive");
@@ -118,7 +118,7 @@ public class JWebSocketClientService extends Service {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
                 super.onOpen(handshakedata);
-                Log.e("JWebSocketClientService", "websocket连接成功");
+                Log.d("JWebSocketClientService", "websocket连接成功");
             }
         };
         connect();
@@ -133,7 +133,7 @@ public class JWebSocketClientService extends Service {
             public void run() {
                 try {
                     //connectBlocking多出一个等待操作，会先连接再发送，否则未连接发送会报错
-                    Log.e("JWebSocketClient","Begin connecting...");
+                    Log.d("JWebSocketClient","Begin connecting...");
                     client.connectBlocking();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -150,7 +150,7 @@ public class JWebSocketClientService extends Service {
      */
     public void sendMsg(String msg) {
         if (client != null) {
-            Log.e("JWebSocketClientService", "发送的消息：" + msg);
+            Log.d("JWebSocketClientService", "发送的消息：" + msg);
             client.send(msg);
         }
     }
@@ -176,7 +176,7 @@ public class JWebSocketClientService extends Service {
     private Runnable heartBeatRunnable = new Runnable() {
         @Override
         public void run() {
-            Log.e("JWebSocketClientService", "心跳包检测websocket连接状态");
+            Log.d("JWebSocketClientService", "心跳包检测websocket连接状态");
             if (client != null) {
                 if (client.isClosed()) {
                     reconnectWs();

@@ -13,11 +13,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -37,7 +43,11 @@ import com.example.websocket.ChatMessageReceiver;
 import com.example.websocket.JWebSocketClientService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
+import com.jzxiang.pickerview.TimePickerDialog;
+import com.jzxiang.pickerview.data.Type;
+import com.jzxiang.pickerview.listener.OnDateSetListener;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -58,20 +68,33 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnDateSetListener {
     private Context mContext;
     private String defaultAvatar;
     private Drawer drawer;
     private MaterialSearchView searchView;
+    private TimePickerDialog startTimePickerDialog;
+    private TimePickerDialog endTimePickerDialog;
+    private TextInputLayout startTime;
+    private TextInputLayout endTime;
+    private TextInputLayout type;
+    private TextInputLayout reward;
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private AutoCompleteTextView orderTypeDropDownMenu;
+
     private List<Order> orderList = new ArrayList<>();
     private EndlessOnScrollListener listener;
     private OrderAdapter adapter;
     private SearchCondition searchCondition = null;
+    private LinearLayout searchConditionLayout = null;
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
     private static final int CUSTOMER_DETAIL_REQUEST = 123;
@@ -84,12 +107,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mContext = MainActivity.this;
         defaultAvatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
+        searchConditionLayout = findViewById(R.id.search_condition);
+        type = findViewById(R.id.order_type);
+        reward = findViewById(R.id.order_reward);
         setupDrawer("温斯顿", "17777777777", defaultAvatar);
         setupActionBar();
         setupSearchView();
         setupRecyclerView();
         setupAddActivityButton();
         setupRefreshLayout();
+        setupSearchConditionButtons();
         new Thread(this::getUserInfo).start();
         new Thread(this::updateActivityList).start();
 
@@ -120,8 +147,30 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d("Query Text Submit", "-----------");
-                searchCondition.title = query;
+                searchConditionLayout.setVisibility(View.GONE);
+                if (!query.toLowerCase().equals("all")) {
+                    searchCondition.title = query;
+                }
+
+                String order_type = Objects.requireNonNull(type.getEditText()).getEditableText().toString();
+                String order_reward = Objects.requireNonNull(reward.getEditText()).getEditableText().toString();
+                String order_start = Objects.requireNonNull(startTime.getEditText()).getEditableText().toString();
+                String order_end = Objects.requireNonNull(endTime.getEditText()).getEditableText().toString();
+
+                if (!order_type.equals(getString(R.string.default_no_limit_type))){
+                    searchCondition.type = order_type;
+                }
+                if (!order_reward.equals(String.valueOf(0))){
+                    searchCondition.reward_inf = Integer.parseInt(order_reward);
+                    Log.e("reward.inf = ", order_reward);
+                }
+                if (!order_start.equals(getString(R.string.default_no_limit_time))){
+                    searchCondition.start_time = order_start;
+                }
+                if (!order_end.equals(getString(R.string.default_no_limit_time))){
+                    searchCondition.end_time = order_end;
+                }
+                searchView.closeSearch();
                 updateActivityList();
                 return true;
             }
@@ -130,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 //Do some magic
                 Log.d("Query Text Change", "-----------");
+                searchConditionLayout.setVisibility(View.VISIBLE);
                 return false;
             }
         });
@@ -144,14 +194,31 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     searchView.setQuery(searchCondition.title, false);
                 }
+                searchConditionLayout.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onSearchViewClosed() {
                 //Do some magic
                 Log.d("Search View Closed", "-----------");
+                searchConditionLayout.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    public void onDateSet(TimePickerDialog dialog, long count) {
+        String text = getDateToString(count);
+        if (dialog == startTimePickerDialog) {
+            Objects.requireNonNull(startTime.getEditText()).setText(text);
+        } else if (dialog == endTimePickerDialog) {
+            Objects.requireNonNull(endTime.getEditText()).setText(text);
+        }
+    }
+
+    public String getDateToString(long time) {
+        Date d = new Date(time);
+        return sf.format(d);
     }
 
     @Override
@@ -160,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
         MenuItem item = menu.findItem(R.id.search);
         searchView = findViewById(R.id.search_view);
         searchView.setMenuItem(item);
+
         return true;
     }
 
@@ -252,9 +320,81 @@ public class MainActivity extends AppCompatActivity {
         SwipeRefreshLayout layout = findViewById(R.id.layout_swipe_refresh);
         layout.setOnRefreshListener(() -> {
             layout.setRefreshing(true);
-            updateActivityList();
+            updateActivityListWithNoSearchCondition();
             layout.setRefreshing(false);
         });
+    }
+
+    private void setupSearchConditionButtons() {
+        startTime = findViewById(R.id.order_start_time);
+        endTime = findViewById(R.id.order_end_time);
+        long tenYears = 10L * 365 * 1000 * 60 * 60 * 24L;
+
+        startTimePickerDialog = new TimePickerDialog.Builder()
+                .setCallBack(this)
+                .setCancelStringId("取消")
+                .setSureStringId("确认")
+                .setTitleStringId("开始时间")
+                .setYearText("年")
+                .setMonthText("月")
+                .setDayText("日")
+                .setHourText("时")
+                .setMinuteText("分")
+                .setCyclic(false)
+                .setMinMillseconds(System.currentTimeMillis())
+                .setMaxMillseconds(System.currentTimeMillis() + tenYears)
+                .setCurrentMillseconds(System.currentTimeMillis())
+                .setThemeColor(getResources().getColor(R.color.colorAccent))
+                .setType(Type.ALL)
+                .setWheelItemTextNormalColor(getResources().getColor(R.color.timetimepicker_default_text_color))
+                .setWheelItemTextSelectorColor(getResources().getColor(R.color.timepicker_toolbar_bg))
+                .setWheelItemTextSize(16)
+                .build();
+
+        endTimePickerDialog = new TimePickerDialog.Builder()
+                .setCallBack(this)
+                .setCancelStringId("取消")
+                .setSureStringId("确认")
+                .setTitleStringId("结束时间")
+                .setYearText("年")
+                .setMonthText("月")
+                .setDayText("日")
+                .setHourText("时")
+                .setMinuteText("分")
+                .setCyclic(false)
+                .setMinMillseconds(System.currentTimeMillis())
+                .setMaxMillseconds(System.currentTimeMillis() + tenYears)
+                .setCurrentMillseconds(System.currentTimeMillis())
+                .setThemeColor(getResources().getColor(R.color.colorAccent))
+                .setType(Type.ALL)
+                .setWheelItemTextNormalColor(getResources().getColor(R.color.timetimepicker_default_text_color))
+                .setWheelItemTextSelectorColor(getResources().getColor(R.color.timepicker_toolbar_bg))
+                .setWheelItemTextSize(16)
+                .build();
+
+        Button reviseStartTimeButton = findViewById(R.id.button_revise_start_time);
+        Button reviseEndTimeButton = findViewById(R.id.button_revise_end_time);
+
+        reviseStartTimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startTimePickerDialog.show(getSupportFragmentManager(), "month_day_hour_minute");
+            }
+        });
+        reviseEndTimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endTimePickerDialog.show(getSupportFragmentManager(), "month_day_hour_minute");
+            }
+        });
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(MainActivity.this,
+                        R.layout.item_dropdownmenu,
+                        Order.types);
+
+        orderTypeDropDownMenu = findViewById(R.id.type_dropdownmenu);
+        orderTypeDropDownMenu.setAdapter(adapter);
     }
 
     @Override
@@ -312,6 +452,14 @@ public class MainActivity extends AppCompatActivity {
         if (infoRequest != null) {
             MySingleton.getInstance(this).addToRequestQueue(infoRequest);
         }
+    }
+
+
+
+    private void updateActivityListWithNoSearchCondition() {
+        Log.d("UPDATE ACTIVITY LIST", "called");
+        listener.reset();
+        requestOrderInPage(1, null, true);
     }
 
     private void updateActivityList() {
@@ -384,6 +532,7 @@ public class MainActivity extends AppCompatActivity {
                         if (success) {
                             JSONArray list = response.getJSONArray("order_list");
                             int len = list.length();
+                            Log.e("requestAct:: ", String.valueOf(len));
                             List<Order> orderList = new ArrayList<>();
                             for (int i = 0; i < len; ++i) {
                                 JSONObject o = (JSONObject) list.get(i);
@@ -402,10 +551,15 @@ public class MainActivity extends AppCompatActivity {
                                 orderList.add(new Order(title, id, type, detail, employer, employer_id,
                                         startTime, endTime, avatar, reward, targetLocation));
                             }
+
                             if (refresh) {
                                 refreshList(orderList);
                             } else {
                                 showMoreOrder(orderList);
+                            }
+                            if (MainActivity.this.orderList.size() == 0) {
+                                CoordinatorLayout cl = findViewById(R.id.main_background);
+                                Snackbar.make(cl, R.string.no_search_order, Snackbar.LENGTH_SHORT).show();
                             }
                         } else {
                             CoordinatorLayout cl = findViewById(R.id.main_background);
@@ -433,6 +587,7 @@ public class MainActivity extends AppCompatActivity {
         public String start_time = null, end_time = null;
         public String title = null;
         public String location = null;
+        public String type = null;
         public int reward_inf = -1, reward_sup = -1;
 
         Map<String, String> getCondition() {
@@ -448,6 +603,9 @@ public class MainActivity extends AppCompatActivity {
             }
             if (location != null) {
                 map.put("order_location", location);
+            }
+            if (type != null) {
+                map.put("order_type", type);
             }
             if (reward_inf >= 0) {
                 map.put("order_reward_inf", String.valueOf(reward_inf));
