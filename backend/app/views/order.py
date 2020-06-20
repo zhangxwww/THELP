@@ -30,8 +30,11 @@ def homepage():
     if reward_inf is not None:
         query = query.filter(Order.reward >= float(reward_inf))
     reward_sup = request.json.get('order_reward_sup')
-    if reward_inf is not None:
-        query = query.filter(Order.reward >= float(reward_sup))
+    if reward_sup is not None:
+        query = query.filter(Order.reward <= float(reward_sup))
+    order_type = request.json.get('order_type')
+    if order_type is not None:
+        query = query.filter(Order.genre == order_type)
     page = request.json.get('page', 1)
     try:
         page = int(page)
