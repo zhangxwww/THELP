@@ -92,7 +92,8 @@ public class Order {
         CANCEL,
         ABORT,
         FINISH,
-        DETAIL
+        DETAIL,
+        EDIT
     }
 
     public enum HistoryType {

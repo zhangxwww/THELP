@@ -179,8 +179,7 @@
                     android:layout_marginLeft="5dp"
                     android:text="发布于"
                     android:textColor="#666666"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="18dp" />
+                    android:layout_gravity="center_vertical" />
                 <TextView
                     android:id="@+id/order_ctime_tv"
                     android:layout_width="wrap_content"
@@ -188,8 +187,7 @@
                     android:layout_marginLeft="5dp"
                     android:text="16:52"
                     android:textColor="#666666"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="12dp" />
+                    android:layout_gravity="center_vertical" />
             </LinearLayout>
 
             <LinearLayout

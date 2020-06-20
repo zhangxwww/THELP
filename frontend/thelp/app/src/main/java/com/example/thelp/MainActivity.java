@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
 
     private static final int ADD_ACTIVITY_REQUEST = 233;
     private static final int CUSTOMER_DETAIL_REQUEST = 123;
+    private static final int PERSON_REQUEST = 110;
 
     private ChatMessageReceiver chatMessageReceiver;
 
@@ -110,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
         searchConditionLayout = findViewById(R.id.search_condition);
         type = findViewById(R.id.order_type);
         reward = findViewById(R.id.order_reward);
-        setupDrawer("温斯顿", "17777777777", defaultAvatar);
         setupActionBar();
         setupSearchView();
         setupRecyclerView();
@@ -295,12 +295,14 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
                         if (id == 2) {
                             intent = new Intent(MainActivity.this, PersonActivity.class);
                             intent.putExtra(UserInfo.USER_IDENTIFICATION, UserInfo.USER_SELF);
+                            startActivityForResult(intent, PERSON_REQUEST);
                         } else if (id == 3) {
                             intent = new Intent(MainActivity.this, HistoryActivity.class);
+                            startActivity(intent);
                         } else if (id == 4) {
                             intent = new Intent(MainActivity.this, MessageActivity.class);
+                            startActivity(intent);
                         }
-                        if (intent != null) startActivity(intent);
                         return false;
                     }
                 })
@@ -312,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
         FloatingActionButton fab = findViewById(R.id.floating_action_button);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            intent.putExtra(AddActivity.STATE, AddActivity.ORDER_CREATE);
             startActivityForResult(intent, ADD_ACTIVITY_REQUEST);
         });
     }
@@ -403,6 +406,12 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
         if (requestCode == ADD_ACTIVITY_REQUEST || requestCode == CUSTOMER_DETAIL_REQUEST) {
             if (resultCode == RESULT_OK) {
                 updateActivityList();
+            }
+        }
+        if (requestCode == PERSON_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                UserInfo userInfo = ((myApplication) getApplicationContext()).getUserInfo();
+                setupDrawer(userInfo.nickName, userInfo.phone, userInfo.avatar);
             }
         }
     }

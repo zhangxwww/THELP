@@ -152,6 +152,9 @@ public class RequestFactory {
             case FINISH:
                 url = ip + "/order/finish";
                 break;
+            case EDIT:
+                url = ip + "/order/edit";
+                break;
             default:
                 return null;
         }

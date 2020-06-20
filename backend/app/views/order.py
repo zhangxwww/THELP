@@ -8,7 +8,8 @@ from app.models import Order
 
 from datetime import datetime
 
-from .utils import session_id_required, get_order, check_order_relation, str_2_datetime, datetime_2_mdhm
+from .utils import session_id_required, get_order, check_order_relation, str_2_datetime, datetime_2_mdhm, \
+    datetime_2_ymdhms
 from .return_value import success, field_required, permission_denied, fail
 
 order = Blueprint('order', __name__)
@@ -55,8 +56,8 @@ def homepage():
             'title': o.title,
             'description': o.description,
             'genre': o.genre,
-            'start_time': o.start_time,
-            'end_time': o.end_time,
+            'start_time': datetime_2_ymdhms(o.start_time),
+            'end_time': datetime_2_ymdhms(o.end_time),
             'target_location': o.target_location,
             'reward': o.reward,
             'customer_name': u.nickname,
@@ -107,7 +108,7 @@ def create(u=None):
 @session_id_required
 def edit(u=None):
     order_info = request.json.get('order_info', {})
-    order_id = request.json.get('order_id')
+    order_id = order_info['order_id']
     o, ret = get_order(order_id)
     if o is None:
         return ret
@@ -120,9 +121,9 @@ def edit(u=None):
     if 'genre' in order_info.keys():
         o.genre = order_info['genre']
     if 'start_time' in order_info.keys():
-        o.start_time = order_info['start_time']
+        o.start_time = str_2_datetime(order_info['start_time'])
     if 'end_time' in order_info.keys():
-        o.end_time = order_info['end_time']
+        o.end_time = str_2_datetime(order_info['end_time'])
     if 'target_location' in order_info.keys():
         o.target_location = order_info['target_location']
     if 'reward' in order_info.keys():
@@ -244,11 +245,11 @@ def detail():
         'description': o.description,
         'genre': o.genre,
         'state': o.state,
-        'start_time': datetime_2_mdhm(o.start_time),
-        'end_time': datetime_2_mdhm(o.end_time),
-        'create_time': datetime_2_mdhm(o.create_time),
-        'accept_time': datetime_2_mdhm(o.accept_time),
-        'finish_time': datetime_2_mdhm(o.finish_time),
+        'start_time': datetime_2_ymdhms(o.start_time),
+        'end_time': datetime_2_ymdhms(o.end_time),
+        'create_time': datetime_2_ymdhms(o.create_time),
+        'accept_time': datetime_2_ymdhms(o.accept_time),
+        'finish_time': datetime_2_ymdhms(o.finish_time),
         'target_location': o.target_location,
         'handler_location': o.handler_location,
         'reward': o.reward,

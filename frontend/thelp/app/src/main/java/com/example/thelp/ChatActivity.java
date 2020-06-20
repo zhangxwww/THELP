@@ -248,7 +248,7 @@ public class ChatActivity extends AppCompatActivity {
                                             public void onResponse(Call call, Response response) throws IOException {
                                                 ((ChatActivity) context).runOnUiThread(() -> {
                                                     //此时已在主线程中，可以更新UI了
-                                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                                     Date date = new Date(System.currentTimeMillis());
                                                     messageList.add(new Message(
                                                             selfAvatar, selfName,
@@ -329,7 +329,7 @@ public class ChatActivity extends AppCompatActivity {
                 //TODO
             }
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
             messageList.add(0, new Message(
                     selfAvatar, selfName,

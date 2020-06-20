@@ -140,14 +140,29 @@
                 android:visibility="gone"
                 android:text="@string/abort_order_button_text"
                 android:textSize="18sp" />
-            <Button
-                android:id="@+id/button_cancel"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorPrimary"
-                android:visibility="gone"
-                android:text="@string/cancel_order_button_text"
-                android:textSize="18sp" />
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/button_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:visibility="gone"
+                    android:text="@string/cancel_order_button_text"
+                    android:textSize="18sp" />
+                <Button
+                    android:id="@+id/button_edit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="30dp"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:visibility="gone"
+                    android:text="@string/edit_order_button_text"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
             <Button
                 android:id="@+id/button_assess"
                 android:layout_width="wrap_content"

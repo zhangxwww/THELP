@@ -57,7 +57,12 @@ public class CustomerDetailActivity extends AppCompatActivity {
     @BindView(R.id.button_assess)
     Button assessButton;
 
+    @BindView(R.id.button_edit)
+    Button editButton;
+
     private static final int ASSESS_CODE = 0;
+    private static final int EDIT_CODE = 1;
+
 
     private Order order;
 
@@ -273,6 +278,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
                 stateCode = 1;
                 handlerLayout.setVisibility(GONE);
                 cancelButton.post(() -> cancelButton.setVisibility(View.VISIBLE));
+                editButton.post(() -> editButton.setVisibility(View.VISIBLE));
             } else if (stat.equals(res.getString(R.string.order_accepted))) {
                 stateCode = 2;
                 abortButton.post(() -> abortButton.setVisibility(View.VISIBLE));
@@ -309,9 +315,6 @@ public class CustomerDetailActivity extends AppCompatActivity {
         });
 
         cancelButton.setOnClickListener(v -> {
-            //仿个人页的修改按钮，需要弹出框框确认中止
-            //成功取消的话还需要做:
-
             JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
                     orderId, Order.OperationType.CANCEL, res.getString(R.string.url),
                     response -> {
@@ -319,6 +322,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
                             boolean success = response.getBoolean("success");
                             if (success) {
                                 cancelButton.setVisibility(GONE);
+                                editButton.setVisibility(GONE);
                                 arrayOfStatus.clear();
                                 arrayOfStatus.add(new OrderStatusModel(
                                         res.getString(R.string.order_canceled_text),
@@ -343,10 +347,14 @@ public class CustomerDetailActivity extends AppCompatActivity {
             }
         });
 
-        abortButton.setOnClickListener(v -> {
-            //仿个人页的修改按钮，需要弹出框框确认中止
-            //成功中止的话还需要做:
+        editButton.setOnClickListener(v -> {
+            Intent intent = new Intent(CustomerDetailActivity.this, AddActivity.class);
+            intent.putExtra(AddActivity.STATE, AddActivity.ORDER_EDIT);
+            intent.putExtra("ORDER_ID", orderId);
+            startActivityForResult(intent, EDIT_CODE);
+        });
 
+        abortButton.setOnClickListener(v -> {
             JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
                     orderId, Order.OperationType.ABORT, res.getString(R.string.url),
                     response -> {
@@ -355,6 +363,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
                             if (success) {
                                 abortButton.setVisibility(GONE);
                                 cancelButton.setVisibility(View.VISIBLE);
+                                editButton.setVisibility(View.VISIBLE);
                                 handlerLayout.setVisibility(View.GONE);
                                 arrayOfStatus.get(1).isAchieved = false;
                                 OrderStatusAdapter adapter = new OrderStatusAdapter(this, R.layout.item_order_state, arrayOfStatus);
@@ -386,6 +395,11 @@ public class CustomerDetailActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 assessButton.setVisibility(GONE);
                 Snackbar.make(bottomSheet, "评分成功", Snackbar.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == EDIT_CODE) {
+            if (resultCode == RESULT_OK) {
+                Snackbar.make(bottomSheet, "修改成功", Snackbar.LENGTH_SHORT).show();
             }
         }
     }

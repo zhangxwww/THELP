@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -42,6 +43,10 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
     private TextInputLayout endTime;
     private AutoCompleteTextView orderTypeDropDownMenu;
     SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public final static String STATE = "ADD_ACTIVITY_STATE";
+    public final static int ORDER_CREATE = 0;
+    public final static int ORDER_EDIT = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,14 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
         setupDateTimePicker();
         setupToolbar();
         setupOrderTypeDropDownMenu();
+
+        int state =  Objects.requireNonNull(getIntent().getExtras()).getInt(STATE);
+        if (state == ORDER_EDIT) {
+            TextView toolbarTitle = findViewById(R.id.toolbar_title);
+            toolbarTitle.setText(getString(R.string.edit_text));
+            int orderId = Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID");
+            recoverOrderInfo(orderId);
+        }
     }
 
     @Override
@@ -67,6 +80,49 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
         return sf.format(d);
     }
 
+    private void recoverOrderInfo(int orderId) {
+        JsonObjectRequest req = RequestFactory.getOrderOperationRequest(
+                orderId,
+                Order.OperationType.DETAIL,
+                getResources().getString(R.string.url),
+                response -> {
+                    try {
+                        boolean success = response.getBoolean("success");
+                        if (success) {
+                            Order order = Order.parseFromJSONResponse(response, orderId);
+                            showOrderInfo(order);
+                        } else {
+                            String error = response.getString("error_msg");
+                            Log.d("Error Msg", error);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.d("EDIT ORDER", "Fail " + error.getMessage())
+        );
+        if (req != null) {
+            MySingleton.getInstance(this).addToRequestQueue(req);
+        }
+    }
+
+    private void showOrderInfo(Order order) {
+        TextInputLayout title = findViewById(R.id.order_title);
+        Objects.requireNonNull(title.getEditText()).setText(order.title);
+        TextInputLayout detail = findViewById(R.id.order_detail);
+        Objects.requireNonNull(detail.getEditText()).setText(order.detail);
+        TextInputLayout target = findViewById(R.id.order_target_location);
+        Objects.requireNonNull(target.getEditText()).setText(order.targetLocation);
+        TextInputLayout type = findViewById(R.id.order_type);
+        Objects.requireNonNull(type.getEditText()).setText(order.type);
+        TextInputLayout reward = findViewById(R.id.order_reward);
+        Objects.requireNonNull(reward.getEditText()).setText(String.valueOf(order.reward));
+        TextInputLayout start = findViewById(R.id.order_start_time);
+        Objects.requireNonNull(start.getEditText()).setText(order.startTime);
+        TextInputLayout end = findViewById(R.id.order_end_time);
+        Objects.requireNonNull(end.getEditText()).setText(order.endTime);
+    }
+
     private void setupOrderTypeDropDownMenu() {
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(AddActivity.this,
@@ -79,11 +135,16 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
 
     private void setupToolbar() {
         Button submitBtn = findViewById(R.id.submit_button);
-        submitBtn.setOnClickListener(v -> submit());
+        int state =  Objects.requireNonNull(getIntent().getExtras()).getInt(STATE);
+        if (state == ORDER_CREATE) {
+            submitBtn.setOnClickListener(v -> submit(true));
+        } else {
+            submitBtn.setOnClickListener(v -> submit(false));
+        }
         Button navBack = findViewById(R.id.nav_back_button);
-        navBack.setOnClickListener(v -> backToMainActivity());
+        navBack.setOnClickListener(v -> backToLastActivity());
         Toolbar toolbar = findViewById(R.id.app_bar);
-        toolbar.setNavigationOnClickListener(v -> backToMainActivity());
+        toolbar.setNavigationOnClickListener(v -> backToLastActivity());
     }
 
     private void setupDateTimePicker() {
@@ -150,13 +211,13 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
         });
     }
 
-    private void backToMainActivity() {
+    private void backToLastActivity() {
         Intent intent = new Intent();
         setResult(RESULT_OK, intent);
         finish();
     }
 
-    private void submit() {
+    private void submit(boolean isCreate) {
         TextInputLayout title = findViewById(R.id.order_title);
         TextInputLayout detail = findViewById(R.id.order_detail);
         TextInputLayout target = findViewById(R.id.order_target_location);
@@ -234,7 +295,9 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
         order_info.put("end_time", Objects.requireNonNull(order_end));
         order_info.put("target_location", Objects.requireNonNull(order_target));
         order_info.put("reward", Objects.requireNonNull(order_reward));
-
+        if (!isCreate) {
+            order_info.put("order_id", String.valueOf(Objects.requireNonNull(getIntent().getExtras()).getInt("ORDER_ID")));
+        }
         Map<String, Map<String, String>> map = new HashMap<>();
         map.put("order_info", order_info);
         String json = new Gson().toJson(map);
@@ -245,7 +308,13 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
             e.printStackTrace();
             return;
         }
-        String postUrl = AddActivity.this.getString(R.string.url) + "/order/create";
+        String postUrl;
+        if (isCreate) {
+            postUrl = AddActivity.this.getString(R.string.url) + "/order/create";
+        } else {
+            postUrl = AddActivity.this.getString(R.string.url) + "/order/edit";
+        }
+
         JsonObjectRequest addNewActivityRequest = RequestFactory.getRequest(
                 Request.Method.POST,
                 postUrl,
@@ -254,7 +323,9 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
                     try {
                         boolean success = response.getBoolean("success");
                         if (success) {
-                            backToMainActivity();
+                            Intent intent = new Intent();
+                            setResult(RESULT_OK, intent);
+                            finish();
                         } else {
                             LinearLayout ll = findViewById(R.id.add_activity_background);
                             String error = response.getString("error_msg");
@@ -265,7 +336,7 @@ public class AddActivity extends AppCompatActivity implements OnDateSetListener 
                         e.printStackTrace();
                     }
                 },
-                error -> Log.d("CREATE", "Fail " + error.getMessage())
+                error -> Log.d("CREATE/EDIT", "Fail " + error.getMessage())
         );
         MySingleton.getInstance(this).addToRequestQueue(addNewActivityRequest);
     }

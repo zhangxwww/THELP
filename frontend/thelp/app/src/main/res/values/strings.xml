@@ -29,6 +29,7 @@
     <string name="publish_placeholder">发布人</string>
     <string name="time_placeholder">某年某月某日</string>
     <string name="add_text">创建新订单</string>
+    <string name="edit_text">修改订单</string>
     <string name="title_hint">输入订单名称，尽量简洁易懂</string>
     <string name="titel_label">订单标题</string>
     <string name="title_label">订单名称</string>
@@ -62,6 +63,7 @@
     <string name="finish_order_button_text">完成</string>
     <string name="abort_order_button_text">中止</string>
     <string name="cancel_order_button_text">取消</string>
+    <string name="edit_order_button_text">修改</string>
     <string name="assess_order_button_text">评价</string>
     <string name="assess">订单完成！给您的接单人打个分吧！</string>
     <string name="message">消息</string>
