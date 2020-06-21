@@ -480,6 +480,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
         if (requestCode == ASSESS_CODE) {
             if (resultCode == RESULT_OK) {
                 assessButton.setVisibility(GONE);
+                orderStatusList(orderId);
                 Snackbar.make(bottomSheet, "评分成功", Snackbar.LENGTH_SHORT).show();
             }
         }

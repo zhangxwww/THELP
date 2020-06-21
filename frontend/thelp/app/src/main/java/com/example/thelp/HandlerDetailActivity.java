@@ -281,10 +281,34 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 locationClient.stop();
                 shareLocationButton.post(()->shareLocationButton.setText(R.string.share_location_button_text));
                 isSharingLocation = false;
+                JsonObjectRequest req = RequestFactory.shareHandlerLocationRequest(
+                        orderId,
+                        0,
+                        0,
+                        getResources().getString(R.string.url),
+                        response -> {
+                            try {
+                                boolean success = response.getBoolean("success");
+                                if (success) {
+                                    Log.d("ShareLocation","Success");
+                                } else {
+                                    String error = response.getString("error_msg");
+                                    Log.d("ShareLocation Error", error);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        error -> Log.d("ShareLocation", "Fail " + error.getMessage())
+                );
+                if (req != null) {
+                    MySingleton.getInstance(HandlerDetailActivity.this).addToRequestQueue(req);
+                }
             } else {
                 locationClient.start();
                 shareLocationButton.post(()->shareLocationButton.setText(R.string.stop_share_location_button_text));
                 isSharingLocation = true;
+
             }
         });
     }
