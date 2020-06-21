@@ -231,6 +231,60 @@ public class RequestFactory {
         );
     }
 
+    public static JsonObjectRequest shareHandlerLocationRequest(
+            int orderId, double latitude, double longitude, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("order_id", String.valueOf(orderId));
+        map.put("latitude", String.valueOf(latitude));
+        map.put("longitude", String.valueOf(longitude));
+        String json = new Gson().toJson(map);
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url = ip + "/order/sharelocation";
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
+    public static JsonObjectRequest getHandlerLocationRequest(
+            int orderId, String ip,
+            Response.Listener<JSONObject> listener,
+            Response.ErrorListener errorListener) {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("order_id", String.valueOf(orderId));
+        String json = new Gson().toJson(map);
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String url = ip + "/order/getlocation";
+        return getRequest(
+                Request.Method.POST,
+                url,
+                jsonObject,
+                listener,
+                errorListener
+        );
+    }
+
     public static void uploadFile(File file, String ip, String area, Callback callback) {
         OkHttpClient client = new OkHttpClient();
         MediaType contentType = MediaType.parse("text/plain");

@@ -9,7 +9,7 @@ from app.models import Order
 from datetime import datetime
 
 from .utils import session_id_required, get_order, check_order_relation, str_2_datetime, datetime_2_mdhm, \
-    datetime_2_ymdhms
+    datetime_2_ymdhms, get_lat_longi_from_location
 from .return_value import success, field_required, permission_denied, fail
 
 order = Blueprint('order', __name__)
@@ -131,6 +131,37 @@ def edit(u=None):
     db.session.commit()
     return success()
 
+
+@order.route('/sharelocation', methods=['POST'])
+@session_id_required
+def sharelocation(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if not check_order_relation(o, u, 'handler'):
+        return permission_denied()
+    latitude = request.json.get('latitude')
+    longitude = request.json.get('longitude')
+    o.handler_location = latitude + ',' + longitude
+    db.session.commit()
+    return success()
+
+
+@order.route('/getlocation', methods=['POST'])
+@session_id_required
+def getlocation(u=None):
+    order_id = request.json.get('order_id')
+    o, ret = get_order(order_id)
+    if o is None:
+        return ret
+    if not check_order_relation(o, u, 'customer'):
+        return permission_denied()
+    latitude, longitude = get_lat_longi_from_location(o.handler_location)
+    return success({
+        'latitude': latitude,
+        'longitude': longitude
+    })
 
 @order.route('/cancel', methods=['POST'])
 @session_id_required

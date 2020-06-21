@@ -147,7 +147,6 @@ public class ChatActivity extends AppCompatActivity {
                         if (success) {
                             List<Message> messagesRaw = Message.listParseFromJSONResponse(response, selfId, getResources().getString(R.string.url));
 
-
                             if (refresh) {
                                 messageList.clear();
                                 ChatActivity.this.page = 1;

@@ -10,17 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-<!--        <com.amap.api.maps2d.MapView-->
-<!--            android:id="@+id/map_view"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent" />-->
         <ImageView
             android:id="@+id/order_image"
             android:layout_width="match_parent"
             android:layout_height="336dp"
             android:contentDescription="@string/description_placeholder"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/salad" />
+            android:scaleType="centerCrop"/>
     </FrameLayout>
 
     <RelativeLayout
@@ -74,10 +69,9 @@
                         android:layout_marginTop="5sp"
                         android:gravity="center">
                         <ImageView
-                            android:id="@+id/eat_imageView"
+                            android:id="@+id/order_type_icon"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_restaurant_24px"/>
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
                 </RelativeLayout>
             </LinearLayout>
@@ -207,15 +201,29 @@
                     android:text="@string/accept_order_button_text"
                     android:textSize="18sp"
                     android:visibility="gone" />
+                <LinearLayout
+                    android:id="@+id/handler_accept_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <Button
+                        android:id="@+id/button_finish"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/colorAccent"
+                        android:text="@string/finish_order_button_text"
+                        android:textSize="18sp"
+                        android:visibility="gone"/>
+                    <Button
+                        android:id="@+id/button_share_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:backgroundTint="@color/colorAccent"
+                        android:text="@string/share_location_button_text"
+                        android:textSize="18sp"
+                        android:visibility="gone"/>
+                </LinearLayout>
 
-                <Button
-                    android:id="@+id/button_finish"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/colorAccent"
-                    android:text="@string/finish_order_button_text"
-                    android:visibility="gone"
-                    android:textSize="18sp" />
 
             </LinearLayout>
 

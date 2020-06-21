@@ -10,11 +10,21 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.model.LatLng;
 import com.bumptech.glide.Glide;
 import com.example.data.Order;
 import com.example.data.UserInfo;
@@ -38,6 +48,9 @@ public class HandlerDetailActivity extends AppCompatActivity {
     BottomSheetBehavior<RelativeLayout> behavior;
     String picUrl = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
     AvatarImageView aiv;
+    boolean isSharingLocation = false;
+    private LocationClient locationClient = null;
+    private int orderId;
 
     @BindView(R.id.order_title_tv)
     TextView orderTitleView;
@@ -66,6 +79,10 @@ public class HandlerDetailActivity extends AppCompatActivity {
     @BindView(R.id.button_finish)
     Button finishButton;
 
+    @BindView(R.id.button_share_location)
+    Button shareLocationButton;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,12 +99,12 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(aiv);
 
-        int orderId = Objects.requireNonNull(
+        orderId = Objects.requireNonNull(
                 getIntent().getExtras()).getInt("ORDER_ID");
         new Thread(() ->
                 getOrderInfo(orderId))
                 .start();
-
+        initLocationOption();
         bindButtonEvent(orderId);
     }
 
@@ -106,14 +123,34 @@ public class HandlerDetailActivity extends AppCompatActivity {
                     acceptButton.setText(R.string.order_accepted_text);
                     acceptButton.post(() -> acceptButton.setVisibility(View.GONE));
                     finishButton.post(() -> finishButton.setVisibility(View.VISIBLE));
+                    shareLocationButton.post(() -> shareLocationButton.setVisibility(View.VISIBLE));
                 });
             } else if (order.state.equals(getResources().getString(R.string.order_finished))) {
                 finishButton.post(() -> finishButton.setVisibility(View.GONE));
+                shareLocationButton.post(() -> shareLocationButton.setVisibility(View.GONE));
             } else {
                 // acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
             }
         } else {
             acceptButton.post(() -> acceptButton.setVisibility(View.VISIBLE));
+        }
+
+        ImageView orderImage = findViewById(R.id.order_image);
+        ImageView orderTypeIcon = findViewById(R.id.order_type_icon);
+        if (order.getType().equals(Order.types[0])) {
+            orderImage.setImageResource(R.drawable.bicycle);
+            orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype1);
+        } else if (order.getType().equals(Order.types[1])) {
+            orderImage.setImageResource(R.drawable.borrow);
+            orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype2);
+        } else if (order.getType().equals(Order.types[2])) {
+            orderImage.setImageResource(R.drawable.find);
+            orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype3);
+        } else if (order.getType().equals(Order.types[3])) {
+            orderImage.setImageResource(R.drawable.learn);
+            orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype4);
+        } else {
+            orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype5);
         }
     }
 
@@ -193,6 +230,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
                             boolean success = response.getBoolean("success");
                             if (success) {
                                 finishButton.setVisibility(View.VISIBLE);
+                                shareLocationButton.setVisibility(View.VISIBLE);
                                 acceptButton.setVisibility(View.GONE);
                                 Snackbar.make(bottomSheet, "接单成功", Snackbar.LENGTH_SHORT).show();
                             } else {
@@ -219,6 +257,7 @@ public class HandlerDetailActivity extends AppCompatActivity {
                             boolean success = response.getBoolean("success");
                             if (success) {
                                 finishButton.setVisibility(View.GONE);
+                                shareLocationButton.setVisibility(View.GONE);
                                 acceptButton.setVisibility(View.GONE);
                                 Snackbar.make(bottomSheet, "成功完成", Snackbar.LENGTH_SHORT).show();
                             } else {
@@ -236,6 +275,84 @@ public class HandlerDetailActivity extends AppCompatActivity {
                 MySingleton.getInstance(this).addToRequestQueue(req);
             }
         });
+        shareLocationButton.setOnClickListener(v -> {
+            // TODO
+            if (isSharingLocation) {
+                locationClient.stop();
+                shareLocationButton.post(()->shareLocationButton.setText(R.string.share_location_button_text));
+                isSharingLocation = false;
+            } else {
+                locationClient.start();
+                shareLocationButton.post(()->shareLocationButton.setText(R.string.stop_share_location_button_text));
+                isSharingLocation = true;
+            }
+        });
+    }
+
+
+    private void initLocationOption() {
+        Log.e("initLocationOption:", "true");
+        locationClient = new LocationClient(getApplicationContext());
+        MyLocationListener myLocationListener = new MyLocationListener();
+        locationClient.registerLocationListener(myLocationListener);
+
+        LocationClientOption locationOption = new LocationClientOption();
+
+        locationOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        locationOption.setCoorType("bd0911");
+        locationOption.setScanSpan(10000);
+
+
+        locationOption.setIsNeedAddress(true);
+        locationOption.setIsNeedLocationDescribe(true);
+        locationOption.setIsNeedLocationDescribe(true);
+
+        locationOption.setOpenGps(true);
+        locationClient.setLocOption(locationOption);
+    }
+
+    /**
+     * 实现定位回调
+     */
+    public class MyLocationListener extends BDAbstractLocationListener {
+        @Override
+        public void onReceiveLocation(BDLocation location) {
+
+            //获取纬度信息
+            double latitude = location.getLatitude();
+            Log.e("Location latitude:", String.valueOf(latitude));
+            //获取经度信息
+            double longitude = location.getLongitude();
+            Log.e("Location longitude:", String.valueOf(longitude));
+            //获取定位类型、定位错误返回码，具体信息可参照类参考中BDLocation类中的说明
+            int errorCode = location.getLocType();
+            String locationDescp = location.getLocationDescribe();
+            Log.e("Location Descp:", locationDescp);
+
+            JsonObjectRequest req = RequestFactory.shareHandlerLocationRequest(
+                    orderId,
+                    latitude,
+                    longitude,
+                    getResources().getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                Log.d("ShareLocation","Success");
+                            } else {
+                                String error = response.getString("error_msg");
+                                Log.d("ShareLocation Error", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("ShareLocation", "Fail " + error.getMessage())
+            );
+            if (req != null) {
+                MySingleton.getInstance(HandlerDetailActivity.this).addToRequestQueue(req);
+            }
+        }
     }
 
     void setBottomSheet() {
@@ -287,5 +404,13 @@ public class HandlerDetailActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (isSharingLocation) {
+            locationClient.stop();
+        }
     }
 }

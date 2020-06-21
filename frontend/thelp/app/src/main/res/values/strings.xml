@@ -61,6 +61,10 @@
     <string name="end_required">请选择结束时间</string>
     <string name="accept_order_button_text">接单</string>
     <string name="finish_order_button_text">完成</string>
+    <string name="share_location_button_text">分享定位</string>
+    <string name="stop_share_location_button_text">结束定位</string>
+    <string name="not_share_location_text">未开启分享定位</string>
+    <string name="share_location_text">已开启分享定位</string>
     <string name="abort_order_button_text">中止</string>
     <string name="cancel_order_button_text">取消</string>
     <string name="edit_order_button_text">修改</string>

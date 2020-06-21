@@ -541,7 +541,6 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
                         if (success) {
                             JSONArray list = response.getJSONArray("order_list");
                             int len = list.length();
-                            Log.e("requestAct:: ", String.valueOf(len));
                             List<Order> orderList = new ArrayList<>();
                             for (int i = 0; i < len; ++i) {
                                 JSONObject o = (JSONObject) list.get(i);

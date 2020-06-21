@@ -19,7 +19,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="194dp"
                 android:id="@+id/order_image"
-                app:srcCompat="@drawable/salad"
+                android:src="@drawable/bicycle"
                 android:scaleType="centerCrop"
                 android:contentDescription="@string/description_placeholder"
                 />

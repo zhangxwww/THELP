@@ -67,12 +67,16 @@ public class OrderAdapter
         holder.orderTime.setText(order.getStartTime());
         holder.viewButton.setTag(position);
         if (order.getType().equals(Order.types[0])) {
+            holder.orderImage.setImageResource(R.drawable.bicycle);
             holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype1);
         } else if (order.getType().equals(Order.types[1])) {
+            holder.orderImage.setImageResource(R.drawable.borrow);
             holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype2);
         } else if (order.getType().equals(Order.types[2])) {
+            holder.orderImage.setImageResource(R.drawable.find);
             holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype3);
         } else if (order.getType().equals(Order.types[3])) {
+            holder.orderImage.setImageResource(R.drawable.learn);
             holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype4);
         } else {
             holder.orderTypeIcon.setBackgroundResource(R.drawable.ic_ordertype5);

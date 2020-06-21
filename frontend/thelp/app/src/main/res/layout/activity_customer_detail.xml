@@ -13,10 +13,11 @@
         <com.baidu.mapapi.map.MapView
             android:id="@+id/bmapView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="600dp"
             android:clickable="true"
             app:layout_anchor="@+id/frameLayout"
-            app:layout_anchorGravity="center" />
+            app:layout_anchorGravity="center"
+            android:focusable="true" />
     </FrameLayout>
 
     <RelativeLayout
@@ -110,6 +111,15 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
                             android:text="3.5"
+                            android:textColor="#666666"
+                            android:layout_gravity="center_vertical"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/order_location_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:text="@string/not_share_location_text"
                             android:textColor="#666666"
                             android:layout_gravity="center_vertical"
                             android:textSize="16sp" />

@@ -162,3 +162,10 @@ def datetime_2_ymdhms(dt):
         return None
     ymdhmsStr = dt.strftime('%Y-%m-%d %H:%M:%S')
     return ymdhmsStr
+
+
+def get_lat_longi_from_location(dt):
+    if dt is None:
+        return 0, 0
+    lat, longi = dt.split(',', 1)
+    return lat, longi

@@ -1,11 +1,16 @@
 package com.example.thelp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +24,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.baidu.location.BDAbstractLocationListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.model.LatLng;
 import com.bumptech.glide.Glide;
 import com.example.data.Order;
 import com.example.data.UserInfo;
@@ -28,6 +43,7 @@ import com.example.request.RequestFactory;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +60,9 @@ public class CustomerDetailActivity extends AppCompatActivity {
     private LinearLayout handlerLayout = null;
     private RelativeLayout bottomSheet = null;
     private List<OrderStatusModel> arrayOfStatus = new ArrayList<>();
+
+    BaiduMap mBaiduMap = null;
+
     private int orderId;
     String picUrl = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
     AvatarImageView aiv;
@@ -59,6 +78,9 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.button_edit)
     Button editButton;
+
+    @BindView(R.id.order_location_tv)
+    TextView locationState;
 
     private static final int ASSESS_CODE = 0;
     private static final int EDIT_CODE = 1;
@@ -86,7 +108,68 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
         mMapView = (MapView) findViewById(R.id.bmapView);
         bindButtonEvent(orderId);
+
+        // 开启地图控件的定位功能
+        mBaiduMap = mMapView.getMap();
+        mBaiduMap.setMyLocationEnabled(true);
+
     }
+
+
+
+    //    -------------------------------------获取handler位置------------------------------------------------
+    private static final long GET_LOCATION_RATE = 10 * 1000;
+    private Handler mHandler = new Handler();
+    private Runnable getLocationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d("CustomerDetail", "获取handler位置");
+            JsonObjectRequest req = RequestFactory.getHandlerLocationRequest(
+                    orderId,
+                    getResources().getString(R.string.url),
+                    response -> {
+                        try {
+                            boolean success = response.getBoolean("success");
+                            if (success) {
+                                double latitude = Double.parseDouble(response.getString("latitude"));
+                                double longitude = Double.parseDouble(response.getString("longitude"));
+                                if (latitude == 0 && longitude == 0) {
+                                    locationState.post(() -> locationState.setText(getString(R.string.not_share_location_text)));
+                                } else {
+                                    locationState.post(() -> locationState.setText(getString(R.string.share_location_text)));
+                                    MyLocationData locData = new MyLocationData.Builder()
+                                            .latitude(latitude)
+                                            .longitude(longitude).build();
+                                    LatLng cenpt =  new LatLng(latitude,longitude);
+                                    MapStatus mMapStatus = new MapStatus.Builder()
+                                            .target(cenpt)
+                                            .zoom(19)
+                                            .build();
+
+                                    MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mMapStatus);
+                                    mBaiduMap.setMapStatus(mMapStatusUpdate);
+                                    // 在地图上显示定位图标
+                                    mBaiduMap.setMyLocationData(locData);
+                                }
+                            } else {
+                                String error = response.getString("error_msg");
+                                Log.d("Error Msg", error);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.d("getLocation", "Fail " + error.getMessage())
+            );
+            if (req != null) {
+                MySingleton.getInstance(CustomerDetailActivity.this).addToRequestQueue(req);
+            }
+            //每隔10s,获取一次
+            mHandler.postDelayed(this, GET_LOCATION_RATE);
+        }
+    };
+
+
 
     private void orderStatusList(int orderId) {
 
@@ -150,7 +233,7 @@ public class CustomerDetailActivity extends AppCompatActivity {
                                 intent.putExtra(UserInfo.USER_INFO, userInfo);
                                 startActivity(intent);
                             });
-                            showHandlerInfo(userInfo.nickName, String.valueOf(userInfo.nickName), userInfo.avatar);
+                            showHandlerInfo(userInfo.nickName, String.valueOf(userInfo.score), userInfo.avatar);
                         } else {
                             String error = response.getString("error_msg");
                             Log.d("Error Msg", error);
@@ -282,11 +365,14 @@ public class CustomerDetailActivity extends AppCompatActivity {
             } else if (stat.equals(res.getString(R.string.order_accepted))) {
                 stateCode = 2;
                 abortButton.post(() -> abortButton.setVisibility(View.VISIBLE));
+                mHandler.post(getLocationRunnable);
             } else if (stat.equals(res.getString(R.string.order_finished))) {
                 stateCode = 3;
+                locationState.post(() -> locationState.setVisibility(View.GONE));
                 assessButton.post(() -> assessButton.setVisibility(View.VISIBLE));
             } else if (stat.equals(res.getString(R.string.order_assessed))) {
                 stateCode = 4;
+                locationState.post(() -> locationState.setVisibility(View.GONE));
             }
             status.add(new OrderStatusModel(
                     res.getString(R.string.order_active_text),
