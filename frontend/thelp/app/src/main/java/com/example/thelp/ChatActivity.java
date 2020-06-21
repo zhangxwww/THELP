@@ -228,7 +228,7 @@ public class ChatActivity extends AppCompatActivity {
                     public void onResult(List<LocalMedia> result) {
                         RelativeLayout cl = findViewById(R.id.chat_activity_bg);
                         for (LocalMedia localMedia : result) {
-                            String photoPath = localMedia.getPath();
+                            String photoPath = localMedia.getRealPath();
                             // 先上传图片
                             new Thread(() -> {
                                 File file = new File(photoPath);
@@ -249,7 +249,7 @@ public class ChatActivity extends AppCompatActivity {
                                                     //此时已在主线程中，可以更新UI了
                                                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                                     Date date = new Date(System.currentTimeMillis());
-                                                    messageList.add(new Message(
+                                                    messageList.add(0,new Message(
                                                             selfAvatar, selfName,
                                                             photoPath,
                                                             simpleDateFormat.format(date),
@@ -257,7 +257,7 @@ public class ChatActivity extends AppCompatActivity {
                                                             Message.IMAGE,
                                                             Message.SEND));
                                                     adapter.notifyDataSetChanged();
-                                                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                                                    recyclerView.scrollToPosition(0);
                                                     });
 
                                                 // 发送图片到webSocket
