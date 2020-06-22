@@ -33,6 +33,7 @@ public class MessageActivity extends AppCompatActivity {
     public static final int READ_SUCCESS_CODE = 0;
     public static final String CHAT_POSITION = "CHAT_POSITION";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +89,9 @@ public class MessageActivity extends AppCompatActivity {
                         if (success) {
                             JSONArray list = response.getJSONArray("user_msg_list");
                             int len = list.length();
+                            if (refresh) {
+                                messageList.clear();
+                            }
                             for (int i = len - 1; i >= 0; i--) {
                                 JSONObject msg = (JSONObject) list.get(i);
                                 String avatar = msg.getString("other_avatar");
@@ -141,6 +145,7 @@ public class MessageActivity extends AppCompatActivity {
                 messageList.get(position).setRead(true);
                 adapter.notifyDataSetChanged();
             }
+            requestLatestMessageInPage(1,true);
         }
     }
 }

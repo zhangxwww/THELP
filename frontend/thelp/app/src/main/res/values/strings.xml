@@ -8,12 +8,13 @@
     <string name="title">THELP</string>
     <string name="username_hint">手机号</string>
     <string name="password_hint">密码</string>
+    <string name="username_helper_text">用户名不能超过9个字</string>
     <string name="helper_text">手机号应为11位</string>
     <string name="password_helper_text">密码不超过20位</string>
     <string name="name_too_long">用户名过长</string>
     <string name="name_required">未输入用户名</string>
     <string name="edit_succeed">修改成功</string>
-    <string name="url">http://192.168.1.6:5000</string>
+    <string name="url">http://49.232.201.185:5000</string>
     <string name="home">主页</string>
     <string name="center">个人中心</string>
     <string name="pm">私信</string>

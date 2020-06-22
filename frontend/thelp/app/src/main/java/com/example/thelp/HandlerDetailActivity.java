@@ -2,9 +2,15 @@ package com.example.thelp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +48,8 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.carbs.android.avatarimageview.library.AvatarImageView;
+
+import static android.view.View.GONE;
 
 public class HandlerDetailActivity extends AppCompatActivity {
     RelativeLayout bottomSheet;
@@ -305,12 +313,66 @@ public class HandlerDetailActivity extends AppCompatActivity {
                     MySingleton.getInstance(HandlerDetailActivity.this).addToRequestQueue(req);
                 }
             } else {
+                checkPermission();
+            }
+        });
+    }
+
+    private static final int LOCATION_CODE = 1;
+    private static final int LOCATION_PERMISSION = 1315;
+    private LocationManager lm;
+    public void checkPermission(){
+        lm = (LocationManager) HandlerDetailActivity.this.getSystemService(HandlerDetailActivity.this.LOCATION_SERVICE);
+        boolean ok = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (ok) {
+            //开了定位服务
+            if (ContextCompat.checkSelfPermission(HandlerDetailActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.e("BRG","没有权限");
+                ActivityCompat.requestPermissions(HandlerDetailActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_CODE);
+            } else {
+                Log.e("all permission:","granted");
                 locationClient.start();
                 shareLocationButton.post(()->shareLocationButton.setText(R.string.stop_share_location_button_text));
                 isSharingLocation = true;
+            }
+        } else {
+            Snackbar.make(bottomSheet, "系统检测到未开启GPS定位服务", Snackbar.LENGTH_SHORT).show();
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(intent, LOCATION_PERMISSION);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LOCATION_PERMISSION) {
+            if (resultCode == RESULT_OK) {
+                checkPermission();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationClient.start();
+                    shareLocationButton.post(()->shareLocationButton.setText(R.string.stop_share_location_button_text));
+                    isSharingLocation = true;
+                } else {
+                    // 权限被用户拒绝了。
+                    Snackbar.make(bottomSheet, "定位权限被禁止，相关地图功能无法使用！", Snackbar.LENGTH_SHORT).show();
+                    locationClient.stop();
+                    shareLocationButton.post(()->shareLocationButton.setText(R.string.share_location_button_text));
+                    isSharingLocation = false;
+                }
 
             }
-        });
+        }
     }
 
 
@@ -341,17 +403,15 @@ public class HandlerDetailActivity extends AppCompatActivity {
     public class MyLocationListener extends BDAbstractLocationListener {
         @Override
         public void onReceiveLocation(BDLocation location) {
-
             //获取纬度信息
             double latitude = location.getLatitude();
             Log.e("Location latitude:", String.valueOf(latitude));
             //获取经度信息
             double longitude = location.getLongitude();
             Log.e("Location longitude:", String.valueOf(longitude));
-            //获取定位类型、定位错误返回码，具体信息可参照类参考中BDLocation类中的说明
-            int errorCode = location.getLocType();
-            String locationDescp = location.getLocationDescribe();
-            Log.e("Location Descp:", locationDescp);
+
+//            String locationDescp = location.getLocationDescribe();
+//            Log.e("Location Descp:", locationDescp);
 
             JsonObjectRequest req = RequestFactory.shareHandlerLocationRequest(
                     orderId,
@@ -399,17 +459,8 @@ public class HandlerDetailActivity extends AppCompatActivity {
                         break;
                     case 3:
                         state = "STATE_EXPANDED"; //处于完全展开的状态
-//                        Log.d("state", "expanded:" );
-//                        TextView detailsTv = findViewById(R.id.order_details_tv);
-//                        int oldH = detailsTv.getHeight();
-//                        Log.d("oldHeight", "height:"+oldH );
-//                        Log.d("getLineCount", "height:"+detailsTv.getLineCount() );
-//                        Log.d("getLineHeight", "height:"+detailsTv.getLineHeight() );
-
                         lp.height = oldHeight + 300;
                         detailsTv.setLayoutParams(lp);
-//                        int newH = detailsTv.getHeight();
-//                        Log.d("newHeight", "height:"+newH );
                         break;
                     case 4:
                         state = "STATE_COLLAPSED"; //默认的折叠状态

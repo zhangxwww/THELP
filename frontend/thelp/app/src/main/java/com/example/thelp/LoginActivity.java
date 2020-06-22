@@ -1,11 +1,13 @@
 package com.example.thelp;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -35,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout passwordEdit;
 
     private String sessionid = null;
+    private final static int MAIN_ACT_REQUEST = 151;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,8 +160,9 @@ public class LoginActivity extends AppCompatActivity {
                         try {
                             boolean success = response.getBoolean("success");
                             if (success) {
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
+                                Intent intent = new Intent();
+                                setResult(RESULT_OK, intent);
+                                finish();
                             } else {
                                 ConstraintLayout cl = findViewById(R.id.login_background);
                                 String error = response.getString("error_msg");
@@ -178,5 +182,21 @@ public class LoginActivity extends AppCompatActivity {
                 }
         );
         MySingleton.getInstance(this).addToRequestQueue(signinRequest);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==KeyEvent.KEYCODE_BACK){
+            moveTaskToBack(true);
+            Log.e("LOG ACT","on onKeyDown()");
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.e("LOG ACT","on onDestroy()");
+        super.onDestroy();
     }
 }

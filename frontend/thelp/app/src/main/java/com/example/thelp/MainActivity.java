@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,31 +100,20 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
     private static final int ADD_ACTIVITY_REQUEST = 233;
     private static final int CUSTOMER_DETAIL_REQUEST = 123;
     private static final int PERSON_REQUEST = 110;
+    private static final int LOG_ACT_REQUEST = 151;
 
     private ChatMessageReceiver chatMessageReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mContext = MainActivity.this;
-        defaultAvatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
-        searchConditionLayout = findViewById(R.id.search_condition);
-        type = findViewById(R.id.order_type);
-        reward = findViewById(R.id.order_reward);
-        setupActionBar();
-        setupSearchView();
-        setupRecyclerView();
-        setupAddActivityButton();
-        setupRefreshLayout();
-        setupSearchConditionButtons();
-        new Thread(this::getUserInfo).start();
-        new Thread(this::updateActivityList).start();
 
-        startJWebSClientService();
-        doRegisterReceiver();
-        //检测通知是否开启
-//        checkNotification(mContext);
+        setUpLoginAct();
+    }
+
+    private void setUpLoginAct() {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivityForResult(intent,LOG_ACT_REQUEST);
     }
 
     private void setupRecyclerView() {
@@ -403,6 +393,30 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LOG_ACT_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                // TODO
+                setContentView(R.layout.activity_main);
+                mContext = MainActivity.this;
+                defaultAvatar = "https://overwatch.nosdn.127.net/2/heroes/Echo/hero-select-portrait.png";
+                searchConditionLayout = findViewById(R.id.search_condition);
+                type = findViewById(R.id.order_type);
+                reward = findViewById(R.id.order_reward);
+                setupActionBar();
+                setupSearchView();
+                setupRecyclerView();
+                setupAddActivityButton();
+                setupRefreshLayout();
+                setupSearchConditionButtons();
+                new Thread(this::getUserInfo).start();
+                new Thread(this::updateActivityList).start();
+
+                startJWebSClientService();
+                doRegisterReceiver();
+                //检测通知是否开启
+//        checkNotification(mContext);
+            }
+        }
         if (requestCode == ADD_ACTIVITY_REQUEST || requestCode == CUSTOMER_DETAIL_REQUEST) {
             if (resultCode == RESULT_OK) {
                 updateActivityList();
@@ -743,7 +757,19 @@ public class MainActivity extends AppCompatActivity implements OnDateSetListener
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (chatMessageReceiver != null) unregisterReceiver(chatMessageReceiver);
         Intent intent = new Intent(mContext, JWebSocketClientService.class);
         stopService(intent);
+        Log.e("MAIN ACT","on destroy()");
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==KeyEvent.KEYCODE_BACK){
+            moveTaskToBack(true);
+            Log.e("MAIN ACT","on onKeyDown()");
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

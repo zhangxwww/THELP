@@ -146,6 +146,7 @@ public class JWebSocketClientService extends Service {
         try {
             if (null != client) {
                 client.close();
+                mHandler.removeCallbacks(heartBeatRunnable);
             }
         } catch (Exception e) {
             e.printStackTrace();

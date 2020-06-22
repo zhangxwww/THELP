@@ -154,9 +154,9 @@ public class PersonActivity extends AppCompatActivity {
                     TextInputEditText textInputEditText = view.findViewById(R.id.modify_text);
                     String name = Objects.requireNonNull(textInputEditText.getText()).toString();
                     CoordinatorLayout cl = findViewById(R.id.person_activity_bg);
-                    if (name.length() >= 11) {
+                    if (name.length() >= 9) {
                         dialog.cancel();
-                        Snackbar.make(cl, getResources().getString(R.string.helper_text), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(cl, getResources().getString(R.string.username_helper_text), Snackbar.LENGTH_LONG).show();
                     } else if (name.length() == 0) {
                         dialog.cancel();
                         Snackbar.make(cl, getResources().getString(R.string.name_required), Snackbar.LENGTH_LONG).show();
